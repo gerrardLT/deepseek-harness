@@ -576,7 +576,7 @@ async function throwGuardedCreateFailure(
  * inherits the destination directory's DACL; a replacement copies the existing target's DACL
  * onto the empty temp before writing and preserves the target descriptor at publication.
  * @param absolutePath - destination; missing parent directories are created.
- * @param content - the full UTF-8 text to write.
+ * @param content - full UTF-8 text or a raw byte stream to write.
  * @param mode - existing destination's POSIX mode to preserve, or `undefined` for a new file;
  * inert as a mode on Windows but identifies replacement security semantics.
  * @param signal - cancellation checked before final publication.
@@ -584,15 +584,18 @@ async function throwGuardedCreateFailure(
  * @param createIfAbsent - when provided, publish with a hard-link no-replace
  * primitive; a concurrent creator's file is preserved and this write is
  * rejected with `FS_NOT_OBSERVED` using the supplied display path.
+ * @param byteLimits - optional maximum and expected byte counts for streamed content.
+ * @returns the streamed byte count, or `undefined` for text content.
  */
 export async function writeFileAtomic(
   absolutePath: string,
-  content: string,
+  content: string | AsyncIterable<Uint8Array>,
   mode: number | undefined,
   signal: AbortSignal | undefined,
   internals: FsIoInternals = {},
   createIfAbsent?: { displayPath: string },
-): Promise<void> {
+  byteLimits?: { maxBytes: number; expectedBytes?: number },
+): Promise<number | undefined> {
   throwIfAborted(signal, 'write')
   const directory = dirname(absolutePath)
   await mkdir(directory, { recursive: true })
@@ -622,7 +625,25 @@ export async function writeFileAtomic(
     if (platform === 'win32' && mode !== undefined) {
       await copyFileDacl(absolutePath, tempPath)
     }
-    await handle.writeFile(content, { encoding: 'utf8', ...signal ? { signal } : {} })
+    let streamedBytes: number | undefined
+    if (typeof content === 'string') {
+      await handle.writeFile(content, { encoding: 'utf8', ...signal ? { signal } : {} })
+    } else {
+      if (byteLimits === undefined) throw new Error('byte limits are required for a streamed write')
+      let bytes = 0
+      for await (const chunk of content) {
+        throwIfAborted(signal, 'write')
+        bytes += chunk.byteLength
+        if (bytes > byteLimits.maxBytes) {
+          throw new FsError(`cannot write "${absolutePath}": content exceeds the ${byteLimits.maxBytes}-byte limit`, 'FS_TOO_LARGE')
+        }
+        await handle.write(chunk)
+      }
+      if (byteLimits.expectedBytes !== undefined && bytes !== byteLimits.expectedBytes) {
+        throw new FsError(`cannot write "${absolutePath}": stream ended at ${bytes} bytes, expected ${byteLimits.expectedBytes}`, 'FS_IO_ERROR')
+      }
+      streamedBytes = bytes
+    }
     await handle.sync()
     await internals.inspectTemp?.({ stagingDir, tempPath })
     if (mode !== undefined) await handle.chmod(mode)
@@ -653,6 +674,7 @@ export async function writeFileAtomic(
     } catch (_committedStagingCleanupFailure) {
       // The target is committed; owner-only staging residue cannot turn that write into a failure.
     }
+    return streamedBytes
   } catch (error: unknown) {
     /* v8 ignore next -- abort-mid-write needs a writeFile/signal race; the non-abort (rename/open) side is tested. */
     let failure: unknown = isAbortError(error) ? new FsError('write aborted', 'FS_ABORTED') : error

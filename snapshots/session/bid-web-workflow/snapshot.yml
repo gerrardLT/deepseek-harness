@@ -1,0 +1,14 @@
+version: 1
+scenario: bid-web-workflow
+profile: bid-web
+composition: bid-web-workflow
+recording: authored
+replay:
+  override: true
+header:
+  class: default
+  pin: true
+  systemPromptSource: bid-web-workflow
+  toolSchemasSource: bid-web-workflow
+workspace:
+  final: true

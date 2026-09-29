@@ -435,6 +435,19 @@ abstract listDir(target: FsTarget, signal?: AbortSignal): Promise<FsDirEntry[]>
 abstract writeText( target: FsTarget, content: string, expected?: FsWriteIntent, signal?: AbortSignal, sandboxPolicy?: SandboxExecutionPolicy, ): Promise<FsWriteOutcome>
 
 /**
+ * Atomically stream raw bytes into a regular file. The provider rejects a
+ * complete stream above `maxBytes`, an exact-length mismatch, and cancellation
+ * before publication; none of those failures changes the destination.
+ * @param target - the resolved target to write.
+ * @param source - byte stream and complete-content limits.
+ * @param expected - the write intent guarding the write; omit for unconditional.
+ * @param signal - aborts before atomic publication takes effect.
+ * @param sandboxPolicy - the per-call mode and workspace root.
+ * @returns the number of bytes atomically published.
+ */
+writeByteStream( target: FsTarget, source: FsByteStreamWrite, expected?: FsWriteIntent, signal?: AbortSignal, sandboxPolicy?: SandboxExecutionPolicy, ): Promise<{ bytes: number }>
+
+/**
  * Atomically edit literal text. When supplied, the version guard is checked
  * before matching so stale content reports `FS_STALE_VERSION`; omission edits
  * the current content without a freshness precondition.

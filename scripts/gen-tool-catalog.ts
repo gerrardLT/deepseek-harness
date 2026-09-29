@@ -64,6 +64,8 @@ import * as StagehandBrowserTools from '@deepseek-ai/dsh-experimental-browser-us
 import type TeamService from '@deepseek-ai/dsh-experimental-agent-team'
 import * as ToolTeam from '@deepseek-ai/dsh-experimental-tool-agent-team'
 import * as ToolTodo from '@deepseek-ai/dsh-tool-todo'
+import * as ToolBid from '@deepseek-ai/dsh-tool-bid'
+import BidService from '@deepseek-ai/dsh-bid'
 import type PluginManager from '@deepseek-ai/dsh-plugin-manager'
 import * as PluginManagerTools from '@deepseek-ai/dsh-plugin-manager/tools'
 import SandboxPolicy from '@deepseek-ai/dsh-sandbox-policy'
@@ -425,6 +427,35 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'The six terminal tools are opt-in and complement one-shot shell/filesystem tools. `terminal_send(run_in_background: true)` registers with `ctx.jobs`; TUI, named key sequences, BEL, resize, auto-start, and cross-agent sharing are absent from the schema.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-bid',
+    dir: 'tool-bid',
+    source: 'packages/bid/tool-bid/src/index.ts',
+    requires: ['ctx.tools', 'ctx.sessionProjections', 'ctx.bid', 'ctx.fs', 'ctx.jobs', 'ctx.subagents', 'owning Agent session'],
+    writes: ['tool/call', 'bid/tender-loaded', 'bid/capability-matched', 'bid/section-generated', 'bid/export-produced', 'tool/result'],
+    async mount(ctx) {
+      // The tool injects the bid REST seam; mount it with a placeholder base URL
+      // (schema harvest never executes the tool, so it is never fetched).
+      process.env.BID_TOOL_CATALOG_TOKEN = 'catalog-token'
+      await ctx.plugin(LocalFileSystem, {})
+      await ctx.plugin(LocalJobRegistry)
+      await ctx.plugin(SubagentRuntime)
+      registerCatalogSubagentProvider(ctx, 'catalog-bid')
+      await ctx.plugin(BidService, {
+        apiBaseUrl: 'http://127.0.0.1:1/api',
+        tokenEnv: 'BID_TOOL_CATALOG_TOKEN',
+        maxTenderBytes: 1048576,
+        maxExportBytes: 1048576,
+      })
+      await ctx.plugin(ToolBid, {
+        readChunkBytes: 65536,
+        subagentProvider: 'catalog-bid',
+        maxConcurrentSections: 4,
+      })
+    },
+    note:
+      'The five bid tools parse, match, generate one section, generate the whole bid in an owner-scoped background job, and export. The whole-bid tool uses bounded ctx.subagents workers for structured briefs and commits central-service section results to the parent Session in manifest order.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-goal',

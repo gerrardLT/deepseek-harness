@@ -35,6 +35,7 @@
 | `@deepseek-ai/dsh-tool-fs` | `edit`、`read`、`read_image`、`write` | `ctx.tools`、`ctx.fs`、`ctx.systemPrompt`、`ctx.attachments (image-tool registration)`、`ctx.llm + an image-capable route (image-tool execution)` | `tool/call`、`fs/write-intent or fs/edit-intent for mutations`、`fs/observed after read presence/absence or successful file operation`、`durable attachment (read_image)`、`tool/result` | - | 先读后写／编辑策略由 `@deepseek-ai/dsh-fs-observation-policy` 添加；它是一个 `fs/*` 事件门禁插件，不会改变 schema。加载这些工具的部署按预期也应加载该插件。没有 `ctx.attachments` 时图片工具不会注册；其 schema 与路由无关，执行时除非确切路由的模型声明图片输入，否则拒绝。 |
 | `@deepseek-ai/dsh-tool-fs-search` | `glob`、`grep` | `ctx.tools`、`ctx.subprocess`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | glob 和 grep 是无条件可用的发现工具，通过 ctx.subprocess spawn 随包提供的 ripgrep 二进制文件（`@vscode/ripgrep`），并作为普通前台调用运行，绝不作为后台任务；无需在宿主机安装 `rg`，也不经过 shell 层。本目录使用 `sampleOverCapGlobResults: true`；部署必须显式选择该行为。结果超过上限时，会通过可选的 ctx.spillStore 后端保存完整的格式化列表；在共置部署中，如果后端公开本地路径，返回的定位信息可供后续读取／搜索。 |
 | `@deepseek-ai/dsh-tool-terminal` | `terminal_close`、`terminal_list`、`terminal_open`、`terminal_read`、`terminal_send`、`terminal_signal` | `ctx.tools`、`ctx.terminals`、`ctx.systemPrompt`、`ctx.jobs at call time for run_in_background` | `tool/call`、`tool/result` | - | 这 6 个终端工具需要选择启用，用于补充一次性 bash／文件系统工具。`terminal_send(run_in_background: true)` 会注册到 `ctx.jobs`；schema 不包含 TUI、具名按键序列、BEL、调整尺寸、自动启动和跨 agent 共享。 |
+| `@deepseek-ai/dsh-tool-bid` | `bid_export`、`bid_generate_section`、`bid_match_capabilities`、`bid_parse_tender` | `ctx.tools`、`ctx.sessionProjections`、`ctx.bid`、`owning Agent session` | `tool/call`、`bid/tender-loaded`、`bid/capability-matched`、`bid/section-generated`、`bid/export-produced`、`tool/result` | - | 四个 bid 工具（解析、匹配、生成章节、导出）都是会话所有的状态；每个都通过 ctx.bid（@deepseek-ai/dsh-bid）委托给中心 bid REST 服务，并追加其 bid/* 事件，UI 把它们折叠进 bidTender/bidOutline/bidMatch 投影。schema 在后端更换时保持稳定。 |
 | `@deepseek-ai/dsh-tool-goal` | `create_goal`、`get_goal`、`update_goal` | `ctx.tools`、`ctx.agents`、`ctx.goals`、`ctx.systemPrompt`、`a calling Agent in an authorized open turn` | `tool/call`、`goal/change for mutations`、`tool/result` | - | create、edit、pause 和 resume 要求直接来自人类的根权限；complete 和 blocked 也接受确切的当前 Goal Round。blocked 的默认下限是 3 个获准的 Round。 |
 | `@deepseek-ai/dsh-schedule` | `schedule_create`、`schedule_delete`、`schedule_list` | `ctx.tools`、`ctx.sessions`、Session 持久化、未来创建的 live 根 Agent | `tool/call`、`schedule/change create or delete`、`tool/result` | - | 仅在选择启用的 Schedule 插件加载后创建的 live 根 Agent scope 内注册。版本 1 接受 after_seconds、显式绝对 at 和有界固定速率 every_seconds，并披露 session-local 交付；管理读取与变更必须通过共享的 Session 持久化 barrier。 |
 | `@deepseek-ai/dsh-tool-lsp` | `lsp` | `ctx.tools`、`ctx.lsp`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | lsp 工具将提供方选择和语言服务器子进程置于 ctx.lsp 之后，因此其模型可见 schema 在更换提供方时保持稳定。运行时要求已注册提供方，例如 `@deepseek-ai/dsh-lsp-stdio`；如果没有提供方，查询会返回结构化 `LSP_UNAVAILABLE` 错误，而不会改变 schema。 |
@@ -1272,6 +1273,127 @@ glob 和 grep 是无条件可用的发现工具，通过 ctx.subprocess spawn �
 来源：[`packages/terminal/tool-terminal/src/index.ts`](../packages/terminal/tool-terminal/src/index.ts)
 
 这 6 个终端工具需要选择启用，用于补充一次性 bash／文件系统工具。`terminal_send(run_in_background: true)` 会注册到 `ctx.jobs`；schema 不包含 TUI、具名按键序列、BEL、调整尺寸、自动启动和跨 agent 共享。
+
+<a id="deepseek-aidsh-tool-bid"></a>
+
+## `@deepseek-ai/dsh-tool-bid`
+
+### `bid_export`
+
+把已加载招标的技术标导出为格式化 DOCX。在章节生成后调用；它返回产出的文件路径与页数。提供 tenderId。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender to export."
+    }
+  },
+  "required": [
+    "tenderId"
+  ]
+}
+```
+
+来源：[`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_generate_bid`
+
+在受管后台任务中生成已加载招标的全部章节。有界子代理准备结构化章节 brief，中心 bid 服务撰写各章节，父会话按清单顺序接收章节事件。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender to generate."
+    }
+  },
+  "required": [
+    "tenderId"
+  ]
+}
+```
+
+来源：[`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_generate_section`
+
+为已加载的招标生成一个技术标章节。在 bid_parse_tender 之后每章节调用一次；它返回起草的章节，并折叠进 bidOutline 投影。提供 tenderId 与 sectionId。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender owning the section."
+    },
+    "sectionId": {
+      "type": "string",
+      "description": "Identifier of the outline section to generate."
+    }
+  },
+  "required": [
+    "tenderId",
+    "sectionId"
+  ]
+}
+```
+
+来源：[`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_match_capabilities`
+
+把企业档案与已加载招标的要求做匹配。在 bid_parse_tender 之后调用；它返回满足多少要求、多少缺口、以及风险说明。提供已加载招标的 tenderId。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender to match against."
+    }
+  },
+  "required": [
+    "tenderId"
+  ]
+}
+```
+
+来源：[`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_parse_tender`
+
+解析招标文件并把其结构化摘要加载进会话。每份招标在匹配能力或撰写章节前调用一次；后续的招标工具要求此处已加载一份招标。提供招标文件路径与其标题。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Workspace-relative path to the tender document to parse."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable tender title shown in the conversation card."
+    }
+  },
+  "required": [
+    "path",
+    "title"
+  ]
+}
+```
+
+来源：[`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+五个 bid 工具分别解析、匹配、生成单个章节、在归属当前 agent 的后台任务中生成整份标书，以及导出。整份生成工具使用有界 `ctx.subagents` worker 准备结构化 brief，并按章节清单顺序把中心服务生成的章节结果提交到父 Session。
 
 <a id="deepseek-aidsh-tool-goal"></a>
 

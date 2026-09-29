@@ -124,6 +124,16 @@ export type FsWriteIntent =
   | { kind: 'createIfAbsent' }
   | { kind: 'replaceIfVersion'; version: FsVersion }
 
+/** Request for an atomic streamed binary write. */
+export interface FsByteStreamWrite {
+  /** Byte chunks in publication order; the provider must not buffer the complete file. */
+  data: AsyncIterable<Uint8Array>
+  /** Inclusive cap on the complete content. */
+  maxBytes: number
+  /** Exact expected length when the producer declares one. */
+  expectedBytes?: number
+}
+
 /** Outcome of a full-file write. */
 export interface FsWriteOutcome {
   /** Whether the write created a new file or replaced an existing one. */

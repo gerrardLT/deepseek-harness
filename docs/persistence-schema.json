@@ -3753,6 +3753,434 @@
       }
     },
     {
+      "key": "event:bid/capability-matched",
+      "kind": "event",
+      "event": "bid/capability-matched",
+      "surface": false,
+      "digest": "0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 6,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 7,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "match",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "gaps",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "matched",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "risks",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 5,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 5
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "bid/capability-matched"
+          }
+        ]
+      }
+    },
+    {
+      "key": "event:bid/export-produced",
+      "kind": "event",
+      "event": "bid/export-produced",
+      "surface": false,
+      "digest": "5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 5,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "artifact",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "docxPath",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "exportId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "pages",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 3,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "bid/export-produced"
+          }
+        ]
+      }
+    },
+    {
+      "key": "event:bid/section-generated",
+      "kind": "event",
+      "event": "bid/section-generated",
+      "surface": false,
+      "digest": "0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 10,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "section",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "title",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "draft"
+          },
+          {
+            "kind": "literal",
+            "value": "final"
+          },
+          {
+            "kind": "literal",
+            "value": "reviewed"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "bid/section-generated"
+          }
+        ]
+      }
+    },
+    {
+      "key": "event:bid/tender-loaded",
+      "kind": "event",
+      "event": "bid/tender-loaded",
+      "surface": false,
+      "digest": "c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 8,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "tender",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionCount",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "sections",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "tenderId",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 5
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "bid/tender-loaded"
+          }
+        ]
+      }
+    },
+    {
       "key": "event:command/done",
       "kind": "event",
       "event": "command/done",
@@ -16209,6 +16637,222 @@
       ]
     },
     {
+      "digest": "0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 8,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 9,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 10,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "section",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "title",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              5,
+              6,
+              7
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "draft"
+          },
+          {
+            "kind": "literal",
+            "value": "final"
+          },
+          {
+            "kind": "literal",
+            "value": "reviewed"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": "bid/section-generated"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/section-generated"
+      ],
+      "sources": []
+    },
+    {
+      "digest": "0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 6,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 7,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "match",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "gaps",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "matched",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "risks",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 5,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 5
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "bid/capability-matched"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/capability-matched"
+      ],
+      "sources": []
+    },
+    {
       "digest": "0d47a8f3d847243c4488e755ad4cab7a04ac5d4621b9c81865524cf3f4d8536f",
       "schema": {
         "root": 0,
@@ -18863,6 +19507,38 @@
       },
       "names": [
         "event:session/title"
+      ],
+      "sources": []
+    },
+    {
+      "digest": "1bdec3eac7943ca72e4d967104dc52957898d207b2bbf5b577a0af3c03f10a8c",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "union",
+            "types": [
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "draft"
+          },
+          {
+            "kind": "literal",
+            "value": "final"
+          },
+          {
+            "kind": "literal",
+            "value": "reviewed"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/section-generated.data.section.status"
       ],
       "sources": []
     },
@@ -29768,6 +30444,20 @@
       ]
     },
     {
+      "digest": "4715b8fc59c832514a51bb510c4912f8c1d3e9b7359dad86866b428d2e76fa9a",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "draft"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "477614bca595a9e7adb5a1870be446b9a8684f3ba8950259d6289f2d3b74f028",
       "schema": {
         "root": 0,
@@ -31212,6 +31902,85 @@
       "sources": []
     },
     {
+      "digest": "4b469b68b45bdbed3b0a6d580c2797d415e97ced192ae20e052bf32f36ca5761",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "tender",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionCount",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "sections",
+                "type": 3,
+                "optional": true
+              },
+              {
+                "name": "tenderId",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 5,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 4
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 5,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 5,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/tender-loaded.data"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:200"
+      ]
+    },
+    {
       "digest": "4b7ddaf3710b88ff9b8df66304f5f97bf03688fd19730eedc2e9535203c820ea",
       "schema": {
         "root": 0,
@@ -32090,6 +32859,9 @@
       "names": [
         "packages/api/session-controller/src/types.ts#SessionRequestId",
         "packages/attachment/attachment/src/brand.ts#AttachmentId",
+        "packages/bid/bid/src/types.ts#BidExportId",
+        "packages/bid/bid/src/types.ts#SectionId",
+        "packages/bid/bid/src/types.ts#TenderId",
         "packages/compaction/compaction/src/brand.ts#CompactionId",
         "packages/core/session/src/types.ts#SessionId",
         "packages/experimental/agent-team/src/types.ts#TeamId",
@@ -32115,6 +32887,9 @@
       "sources": [
         "packages/api/session-controller/src/types.ts:376",
         "packages/attachment/attachment/src/brand.ts:6",
+        "packages/bid/bid/src/types.ts:22",
+        "packages/bid/bid/src/types.ts:25",
+        "packages/bid/bid/src/types.ts:28",
         "packages/compaction/compaction/src/brand.ts:4",
         "packages/core/session/src/types.ts:19",
         "packages/experimental/agent-team/src/types.ts:20",
@@ -34106,6 +34881,70 @@
       ]
     },
     {
+      "digest": "52ecee56150a8055f723d2e8ba368e75da1fc1d2741782c9e0a1b1dbefdb5a00",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 1,
+                "optional": true
+              },
+              {
+                "name": "title",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "draft"
+          },
+          {
+            "kind": "literal",
+            "value": "final"
+          },
+          {
+            "kind": "literal",
+            "value": "reviewed"
+          }
+        ]
+      },
+      "names": [
+        "packages/bid/bid/src/types.ts#BidSection"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:51"
+      ]
+    },
+    {
       "digest": "530da6c0267813bb4511af72883cc518834e624e3b3220a7062955fd57a788a6",
       "schema": {
         "root": 0,
@@ -34534,6 +35373,102 @@
       ]
     },
     {
+      "digest": "5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 5,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "artifact",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "docxPath",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "exportId",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "pages",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 3,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "bid/export-produced"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/export-produced"
+      ],
+      "sources": []
+    },
+    {
       "digest": "587bb11da730e06aa52b62c087d217d6f8f22459b25f31cb9e1e1baf17944e5e",
       "schema": {
         "root": 0,
@@ -34548,6 +35483,69 @@
       "sources": []
     },
     {
+      "digest": "58c16719eecda4fa349aa2b109d3e9ef5a53fb18cde7681b72c4b3d509d65187",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "match",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "gaps",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "matched",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "risks",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 4
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/capability-matched.data"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:202"
+      ]
+    },
+    {
       "digest": "58f94390b982f8a5ac1f4f235ba612557f4a1dc4a995d8b1cec63ce7639decb0",
       "schema": {
         "root": 0,
@@ -34555,6 +35553,20 @@
           {
             "kind": "literal",
             "value": "image/png"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
+      "digest": "59c39fbf9ed537c48817524aabecc59711b7dbf3ec6707086407dca07bf52388",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "reviewed"
           }
         ]
       },
@@ -35076,9 +36088,9 @@
         ]
       },
       "names": [
-        "SessionEventEnvelope[39].sourceEventSeqs",
-        "SessionEventEnvelope[52].sourceEventSeqs",
-        "SessionEventEnvelope[55].sourceEventSeqs",
+        "SessionEventEnvelope[43].sourceEventSeqs",
+        "SessionEventEnvelope[56].sourceEventSeqs",
+        "SessionEventEnvelope[59].sourceEventSeqs",
         "event:assistant/attempt.data.stream[0][0].dt",
         "event:assistant/attempt.data.stream[0][1].dt",
         "event:assistant/attempt.data.stream[0][2].dt",
@@ -38065,6 +39077,20 @@
       "sources": []
     },
     {
+      "digest": "6b9cb60af5039c92daef29dc251a6a5b49a45a9e29f94dae9719f52d2359b975",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "final"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "6bbe793f6a93dc8d50a4d4d3fbb6f8ed15650bcb7e151d28669628f7b7c3fc25",
       "schema": {
         "root": 0,
@@ -38769,6 +39795,58 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "740f859b1474ce5e8705d28da20e096a00dc0061e65e2b0bfebb7db4eaeb09e0",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "gaps",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "matched",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "risks",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 3,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 3
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "packages/bid/bid/src/types.ts#BidMatch"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:63"
+      ]
     },
     {
       "digest": "757013fff5879d73d5753d8d1120faab56110e88ac3932485ab7e034d9e9ce61",
@@ -40312,6 +41390,54 @@
         "SessionEventEnvelope[6]"
       ],
       "sources": []
+    },
+    {
+      "digest": "7c5ab319a37e4bd26d5b24c931563230650cc8cc48eaa83bc4d6d311686c63fb",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "docxPath",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "exportId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "pages",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 1,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          }
+        ]
+      },
+      "names": [
+        "packages/bid/bid/src/types.ts#BidExport"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:75"
+      ]
     },
     {
       "digest": "7c6129b6961cf4b2a030f36c78d2b0a5be38617651a9b81322e054ee512bee06",
@@ -43236,6 +44362,42 @@
       "sources": []
     },
     {
+      "digest": "8dee7aa64ecfae9385138d5c808d34ea8966aa43213afa9f0d60e88d8ad99b30",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "array",
+            "element": 1
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/tender-loaded.data.tender.sections"
+      ],
+      "sources": []
+    },
+    {
       "digest": "8e31bb958e9b015e6f8407eaade32217068159e816f3cc99c3ad76eb889732e0",
       "schema": {
         "root": 0,
@@ -43594,6 +44756,81 @@
         "event:request/header"
       ],
       "sources": []
+    },
+    {
+      "digest": "8f18a915975e27940db90d76765c160068f3cbeada299c4977930ce02f0ee250",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "section",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "status",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "title",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "union",
+            "types": [
+              4,
+              5,
+              6
+            ]
+          },
+          {
+            "kind": "literal",
+            "value": "draft"
+          },
+          {
+            "kind": "literal",
+            "value": "final"
+          },
+          {
+            "kind": "literal",
+            "value": "reviewed"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/section-generated.data"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:204"
+      ]
     },
     {
       "digest": "8f6d609794bf5afc01d7ccf3e03811d32f4b8047f58a2c9a98db0154c2ad7cb9",
@@ -44224,6 +45461,7 @@
         "event:assistant/attempt.data.stream[0][0].texts",
         "event:assistant/attempt.data.stream[0][1].texts",
         "event:assistant/attempt.data.stream[0][2].args",
+        "event:bid/capability-matched.data.match.risks",
         "event:request/header.data.header.config.stop",
         "event:subagent/descriptor.data[1].toolFilter.allow",
         "event:subagent/descriptor.data[1].toolFilter.deny",
@@ -44559,9 +45797,9 @@
         ]
       },
       "names": [
-        "SessionEventEnvelope[39]",
-        "SessionEventEnvelope[52]",
-        "SessionEventEnvelope[55]"
+        "SessionEventEnvelope[43]",
+        "SessionEventEnvelope[56]",
+        "SessionEventEnvelope[59]"
       ],
       "sources": []
     },
@@ -46442,6 +47680,20 @@
       "names": [
         "event:compaction/summary.data[0]"
       ],
+      "sources": []
+    },
+    {
+      "digest": "a02ef27069d1547d9ece91ac32bce473a1e40c15b5fa2697fd53c8136ec518e1",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "bid/tender-loaded"
+          }
+        ]
+      },
+      "names": [],
       "sources": []
     },
     {
@@ -48910,6 +50162,20 @@
       "sources": []
     },
     {
+      "digest": "aae165a14b189456e9f071128ac1e3cdab9c1a65101a56ba50263f17a9073702",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "bid/export-produced"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "ab7ec5f9eb2c6dfacca5da4c37cf7ba85d04172053ee6b1ebf1709ffcd99c1a7",
       "schema": {
         "root": 0,
@@ -50450,6 +51716,20 @@
       "sources": []
     },
     {
+      "digest": "b52e9bb9f10469ebf49a91ce155bd531584ae45bab17fe45be4299af222d7786",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "bid/section-generated"
+          }
+        ]
+      },
+      "names": [],
+      "sources": []
+    },
+    {
       "digest": "b54940ff095c17e874c5be03815f4c2145a256cf3a1d34dae4ab2f7769dfffe8",
       "schema": {
         "root": 0,
@@ -50717,6 +51997,74 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "b5e7f7164523047d4f38f29b45570d44e3f867739c68f65bfe2442dcb63379ef",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionCount",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "sections",
+                "type": 2,
+                "optional": true
+              },
+              {
+                "name": "tenderId",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 3
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 4,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 4,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "packages/bid/bid/src/types.ts#BidTender"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:39"
+      ]
     },
     {
       "digest": "b6ef9c6210be8350cd465f485cf520031fffa6bf3809c61a1e713e834c5982d0",
@@ -54105,6 +55453,122 @@
       "sources": []
     },
     {
+      "digest": "c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "data",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "ignorable",
+                "type": 7,
+                "optional": true
+              },
+              {
+                "name": "seq",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "time",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "type",
+                "type": 8,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "tender",
+                "type": 2,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionCount",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "sections",
+                "type": 4,
+                "optional": true
+              },
+              {
+                "name": "tenderId",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          },
+          {
+            "kind": "array",
+            "element": 5
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 6,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 6,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "literal",
+            "value": true
+          },
+          {
+            "kind": "literal",
+            "value": "bid/tender-loaded"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/tender-loaded"
+      ],
+      "sources": []
+    },
+    {
       "digest": "c93b6f51b399607349b4bcc66b58e848a44250ffc1e2537207bd092dfff94192",
       "schema": {
         "root": 0,
@@ -55521,6 +56985,40 @@
       },
       "names": [],
       "sources": []
+    },
+    {
+      "digest": "d21f3aac002f36f1eed800088c9c4afa7bad2fcf855ca2e2f83ee70c84a90109",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "sectionId",
+                "type": 1,
+                "optional": false
+              },
+              {
+                "name": "title",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          }
+        ]
+      },
+      "names": [
+        "packages/bid/bid/src/types.ts#BidTenderSectionRef"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:31"
+      ]
     },
     {
       "digest": "d28765f87d6b6ab408e0b2f3e7e297791b004b806d8e302c49903ebae815feb2",
@@ -58587,11 +60085,11 @@
         "SessionEventEnvelope[36]",
         "SessionEventEnvelope[37]",
         "SessionEventEnvelope[38]",
+        "SessionEventEnvelope[39]",
         "SessionEventEnvelope[3]",
         "SessionEventEnvelope[40]",
         "SessionEventEnvelope[41]",
         "SessionEventEnvelope[42]",
-        "SessionEventEnvelope[43]",
         "SessionEventEnvelope[44]",
         "SessionEventEnvelope[45]",
         "SessionEventEnvelope[46]",
@@ -58601,11 +60099,15 @@
         "SessionEventEnvelope[4]",
         "SessionEventEnvelope[50]",
         "SessionEventEnvelope[51]",
+        "SessionEventEnvelope[52]",
         "SessionEventEnvelope[53]",
         "SessionEventEnvelope[54]",
-        "SessionEventEnvelope[56]",
+        "SessionEventEnvelope[55]",
         "SessionEventEnvelope[57]",
+        "SessionEventEnvelope[58]",
         "SessionEventEnvelope[5]",
+        "SessionEventEnvelope[60]",
+        "SessionEventEnvelope[61]",
         "SessionEventEnvelope[7]",
         "SessionEventEnvelope[8]",
         "SessionEventEnvelope[9]"
@@ -59349,6 +60851,20 @@
       "names": [
         "event:hook/result"
       ],
+      "sources": []
+    },
+    {
+      "digest": "e788a01ce424454537c79c65bbaecf236039d92b86450655e31f38e9e9e76033",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "literal",
+            "value": "bid/capability-matched"
+          }
+        ]
+      },
+      "names": [],
       "sources": []
     },
     {
@@ -60879,6 +62395,65 @@
       ],
       "sources": [
         "packages/skill/tool-skill/src/index.ts:34"
+      ]
+    },
+    {
+      "digest": "fcc65db165e284c3dff9e0d7ed136c2ddc620e3380fdf9fb50a91c2ff8d44d93",
+      "schema": {
+        "root": 0,
+        "nodes": [
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "artifact",
+                "type": 1,
+                "optional": false
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "object",
+            "properties": [
+              {
+                "name": "docxPath",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "exportId",
+                "type": 2,
+                "optional": false
+              },
+              {
+                "name": "pages",
+                "type": 3,
+                "optional": false
+              },
+              {
+                "name": "tenderId",
+                "type": 2,
+                "optional": true
+              }
+            ],
+            "indices": []
+          },
+          {
+            "kind": "primitive",
+            "type": "string"
+          },
+          {
+            "kind": "primitive",
+            "type": "number"
+          }
+        ]
+      },
+      "names": [
+        "event:bid/export-produced.data"
+      ],
+      "sources": [
+        "packages/bid/bid/src/types.ts:206"
       ]
     },
     {

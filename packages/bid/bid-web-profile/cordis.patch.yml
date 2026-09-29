@@ -1,0 +1,33 @@
+# The bid Web domain layer, applied after dsh-base and dsh-web-app.
+# Deployment values come from environment variables; this file contains no token.
+
+- id: typert-loader
+  config:
+    packages:
+      - '@deepseek-ai/dsh-bid-client'
+
+- insert:
+    - id: bid
+      name: '@deepseek-ai/dsh-bid'
+      config:
+        apiBaseUrl: !!js process.env.BID_API_BASE_URL
+        tokenEnv: !!js process.env.BID_TOKEN_ENV ?? 'BID_DELEGATION_TOKEN'
+        maxTenderBytes: !!js Number(process.env.BID_MAX_TENDER_BYTES ?? 104857600)
+        maxExportBytes: !!js Number(process.env.BID_MAX_EXPORT_BYTES ?? 104857600)
+        timeoutMs: !!js Number(process.env.BID_TIMEOUT_MS ?? 1800000)
+
+    - id: tool-bid
+      name: '@deepseek-ai/dsh-tool-bid'
+      config:
+        readChunkBytes: !!js Number(process.env.BID_READ_CHUNK_BYTES ?? 1048576)
+        subagentProvider: !!js process.env.BID_SUBAGENT_PROVIDER ?? 'spawn'
+        maxConcurrentSections: !!js Number(process.env.BID_MAX_CONCURRENT_SECTIONS ?? 4)
+
+    - id: command-bid
+      name: '@deepseek-ai/dsh-command-bid'
+
+    - id: bid-guard
+      name: '@deepseek-ai/dsh-bid-guard'
+
+    - id: bid-client
+      name: '@deepseek-ai/dsh-bid-client'

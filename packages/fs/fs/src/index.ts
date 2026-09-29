@@ -10,7 +10,9 @@
 
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { SandboxExecutionPolicy, SandboxMode } from '@deepseek-ai/dsh-sandbox'
+import { FsError } from './types.ts'
 import type {
+  FsByteStreamWrite,
   FsDirEntry,
   FsEditOutcome,
   FsEditRequest,
@@ -29,6 +31,7 @@ export {
   FsVersion,
 } from './types.ts'
 export type {
+  FsByteStreamWrite,
   FsEditOutcome,
   FsEditRequest,
   FsDirEntry,
@@ -254,6 +257,32 @@ export abstract class FileSystem extends Service {
     signal?: AbortSignal,
     sandboxPolicy?: SandboxExecutionPolicy,
   ): Promise<FsWriteOutcome>
+
+  /**
+   * Atomically stream raw bytes into a regular file. The provider rejects a
+   * complete stream above `maxBytes`, an exact-length mismatch, and cancellation
+   * before publication; none of those failures changes the destination.
+   * @param target - the resolved target to write.
+   * @param source - byte stream and complete-content limits.
+   * @param expected - the write intent guarding the write; omit for unconditional.
+   * @param signal - aborts before atomic publication takes effect.
+   * @param sandboxPolicy - the per-call mode and workspace root.
+   * @returns the number of bytes atomically published.
+   */
+  writeByteStream(
+    target: FsTarget,
+    source: FsByteStreamWrite,
+    expected?: FsWriteIntent,
+    signal?: AbortSignal,
+    sandboxPolicy?: SandboxExecutionPolicy,
+  ): Promise<{ bytes: number }> {
+    void target
+    void source
+    void expected
+    void signal
+    void sandboxPolicy
+    return Promise.reject(new FsError('filesystem provider does not support streamed byte writes', 'FS_IO_ERROR'))
+  }
 
   /**
    * Atomically edit literal text. When supplied, the version guard is checked

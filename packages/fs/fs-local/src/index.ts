@@ -11,6 +11,7 @@ import { pathToFileURL } from 'node:url'
 import z from '@deepseek-ai/schemastery'
 import { FileSystem, FsError, FsVersion } from '@deepseek-ai/dsh-fs'
 import type {
+  FsByteStreamWrite,
   FsDirEntry,
   FsEditOutcome,
   FsEditRequest,
@@ -226,6 +227,37 @@ export class LocalFileSystem extends FileSystem {
         // is a storage detail the applied-hunk diff ignores.
         after: normalizeLineEndings(content),
       }
+    })
+  }
+
+  override async writeByteStream(
+    target: FsTarget,
+    source: FsByteStreamWrite,
+    expected?: FsWriteIntent,
+    signal?: AbortSignal,
+  ): Promise<{ bytes: number }> {
+    if (!Number.isSafeInteger(source.maxBytes) || source.maxBytes < 0) {
+      throw new FsError('streamed write maxBytes must be a nonnegative safe integer', 'FS_IO_ERROR')
+    }
+    if (source.expectedBytes !== undefined
+      && (!Number.isSafeInteger(source.expectedBytes) || source.expectedBytes < 0 || source.expectedBytes > source.maxBytes)) {
+      throw new FsError('streamed write expectedBytes must be a nonnegative safe integer within maxBytes', 'FS_IO_ERROR')
+    }
+    return this.withLock(target.targetKey, async () => {
+      const existing = await probe(target.targetKey)
+      if (existing && existing.type !== 'file') throw new FsError(`cannot write "${target.displayPath}": not a regular file`, 'FS_NOT_REGULAR_FILE')
+      if (expected?.kind === 'replaceIfVersion' && (!existing || existing.version !== expected.version)) {
+        throw new FsError(`cannot write "${target.displayPath}": file changed since it was read`, 'FS_STALE_VERSION')
+      }
+      if (expected?.kind === 'createIfAbsent' && existing) {
+        throw new FsError(`cannot overwrite existing "${target.displayPath}" without reading it first`, 'FS_NOT_OBSERVED')
+      }
+      const bytes = await writeFileAtomic(
+        target.targetKey, source.data, existing?.mode, signal, this.internals,
+        expected?.kind === 'createIfAbsent' ? { displayPath: target.displayPath } : undefined,
+        { maxBytes: source.maxBytes, ...source.expectedBytes === undefined ? {} : { expectedBytes: source.expectedBytes } },
+      )
+      return { bytes: bytes ?? 0 }
     })
   }
 

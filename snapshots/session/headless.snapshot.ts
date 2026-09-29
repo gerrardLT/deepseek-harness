@@ -1,9 +1,11 @@
 /** Recorded-session replay through the shipped headless `dsh` profile. */
 
 import { startHttpMcpFixture } from '../../packages/mcp/mcp-client/tests/http-fixture.ts'
+import { startBidRestFixture } from './bid-web-workflow/bid-rest-fixture.ts'
 import { cp, copyFile, mkdir, mkdtemp, readFile, readdir, rm, utimes, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
-import { spawnSync } from 'node:child_process'
+import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { basename, delimiter, dirname, isAbsolute, join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -50,7 +52,7 @@ import {
   type SnapshotManifest,
   type WorkspaceSnapshotEntry,
 } from '@deepseek-ai/dsh-session-snapshot'
-import { LOADER_SMOKE_TEST_TIMEOUT_MS, runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
+import { LOADER_SMOKE_TEST_TIMEOUT_MS, resolveExampleLaunch, runLoaderSmoke } from '@deepseek-ai/dsh-loader-smoke'
 import { resolvePwshPath } from '@deepseek-ai/dsh-pwsh-local'
 import { parseSessionLog, prepareSessionSnapshotFixtureForComparison } from '@deepseek-ai/dsh-llm-replay'
 
@@ -166,6 +168,79 @@ function contextOf(logs: readonly string[]): NormalizeContext {
     sessionIds: headers.flatMap(header => typeof header.id === 'string' ? [header.id] : []),
     cwd: typeof headers[0]?.cwd === 'string' ? headers[0].cwd : '\0missing-cwd\0',
   }
+}
+
+function waitForWebReady(child: ChildProcess): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let output = ''
+    const timer = setTimeout(() => reject(new Error(`dsh web did not become ready:\n${output}`)), 30_000)
+    const settle = (error: Error | undefined, url?: string): void => {
+      clearTimeout(timer)
+      child.stdout?.off('data', onData)
+      child.stderr?.off('data', onData)
+      child.off('exit', onExit)
+      if (error !== undefined) reject(error)
+      else resolve(url as string)
+    }
+    const onData = (chunk: Buffer): void => {
+      output += chunk.toString()
+      const match = /dsh web: (http:\/\/[^\s]+)/u.exec(output)
+      if (match?.[1] !== undefined) settle(undefined, match[1])
+    }
+    const onExit = (code: number | null): void => settle(new Error(`dsh web exited ${String(code)} before ready:\n${output}`))
+    child.stdout?.on('data', onData)
+    child.stderr?.on('data', onData)
+    child.once('exit', onExit)
+  })
+}
+
+async function stopWeb(child: ChildProcess): Promise<void> {
+  if (child.exitCode !== null || child.signalCode !== null) return
+  const exited = new Promise<void>(resolve => child.once('exit', () => resolve()))
+  child.kill('SIGTERM')
+  await exited
+}
+
+async function authenticatedWeb(launchUrl: string): Promise<{ origin: string; cookie: string }> {
+  const response = await fetch(launchUrl, { redirect: 'manual' })
+  const setCookie = response.headers.get('set-cookie')
+  if (response.status !== 303 || setCookie === null) {
+    throw new Error(`dsh web authentication returned HTTP ${String(response.status)}`)
+  }
+  return { origin: new URL(launchUrl).origin, cookie: setCookie.split(';', 1)[0] as string }
+}
+
+async function webRpc<T>(
+  authenticated: { origin: string; cookie: string }, endpoint: string, args: object,
+): Promise<T> {
+  const response = await fetch(`${authenticated.origin}/api/${endpoint}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', cookie: authenticated.cookie },
+    body: JSON.stringify({
+      type: 'client-request', rpcId: `snapshot-${randomUUID()}`, method: endpoint, payload: { args },
+    }),
+  })
+  if (!response.ok) throw new Error(`${endpoint} failed over HTTP ${String(response.status)}: ${await response.text()}`)
+  const body = await response.json() as {
+    result: { ok: true; value: T } | { ok: false; error: { code: string; message: string } }
+  }
+  if (!body.result.ok) throw new Error(`${endpoint} failed: ${body.result.error.code}: ${body.result.error.message}`)
+  return body.result.value
+}
+
+async function waitForPersistedTurn(cwd: string): Promise<SessionLog[]> {
+  const deadline = Date.now() + 30_000
+  let last: SessionLog[] = []
+  while (Date.now() < deadline) {
+    try {
+      last = await persistedSessions(cwd)
+      if (last.some(log => turnReasonFromSession(log.content) !== undefined)) return last
+    } catch (error) {
+      if (!(error instanceof Error) || !error.message.includes('ENOENT')) throw error
+    }
+    await new Promise(resolve => setTimeout(resolve, 25))
+  }
+  throw new Error(`dsh web did not persist a completed turn; observed ${String(last.length)} sessions`)
 }
 
 async function persistedSessions(cwd: string): Promise<SessionLog[]> {
@@ -432,6 +507,10 @@ function stderrFromSession(log: string): string {
   return `${output}dsh: ${error.code}: ${error.message}\n`
 }
 
+function scrubWebUrl(text: string): string {
+  return text.replace(/http:\/\/127\.0\.0\.1:\d+/gu, 'http://127.0.0.1:{{port}}')
+}
+
 function modelFromSession(log: string): { provider: string; model: string } {
   for (const record of records(log)) {
     if (record.type !== 'request/header') continue
@@ -443,6 +522,50 @@ function modelFromSession(log: string): { provider: string; model: string } {
     }
   }
   throw new Error('headless snapshot session has no request model')
+}
+
+interface WebSnapshotRunOptions {
+  readonly scenario: HeadlessScenario
+  readonly cwd: string
+  readonly patches: readonly string[]
+  readonly task: string
+  readonly env: NodeJS.ProcessEnv
+}
+
+async function runWebSnapshot(options: WebSnapshotRunOptions): Promise<SessionLog[]> {
+  const launch = resolveExampleLaunch({
+    srcBin: dshBin,
+    configArgs: [
+      '--profile', options.scenario.manifest.profile,
+      ...options.patches.flatMap(file => ['--patch', isAbsolute(file) ? file : join(options.cwd, file)]),
+      '--no-open', '--port', '0',
+    ],
+    tsconfigPath,
+    sourceImport: 'tsx/esm',
+    env: {
+      DSH_HOME: join(options.cwd, '.dsh'),
+      DSH_AGENTS_HOME: join(options.cwd, '.agents'),
+      ...options.env,
+    },
+  })
+  const child = spawn(launch.command, launch.args, {
+    cwd: options.cwd,
+    env: { ...process.env, ...launch.env },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  try {
+    const authenticated = await authenticatedWeb(await waitForWebReady(child))
+    const created = await webRpc<{ sessionId: string }>(authenticated, 'session/create', { request: {} })
+    await webRpc<{ accepted: true }>(authenticated, 'session/prompt', { request: {
+      requestId: randomUUID(),
+      sessionId: created.sessionId,
+      mode: 'queue',
+      content: [{ type: 'text', text: options.task }],
+    } })
+    return await waitForPersistedTurn(options.cwd)
+  } finally {
+    await stopWeb(child)
+  }
 }
 
 async function seedWorkspace(scenario: HeadlessScenario, cwd: string): Promise<void> {
@@ -506,9 +629,9 @@ async function collectScenarios(): Promise<HeadlessScenario[]> {
     const manifestPath = join(dir, 'snapshot.yml')
     if (!existsSync(manifestPath)) continue
     const manifest = parseSnapshotManifest(await readFile(manifestPath, 'utf8'), manifestPath)
-    if (manifest.profile !== 'headless' || manifest.composition === undefined) continue
+    if (!['headless', 'bid-web'].includes(manifest.profile) || manifest.composition === undefined) continue
     if (manifest.recording === undefined || manifest.header === undefined) {
-      throw new Error(`${entry.name}: a headless corpus manifest needs recording and header metadata`)
+      throw new Error(`${entry.name}: a CLI corpus manifest needs recording and header metadata`)
     }
     scenarios.push({
       name: entry.name,
@@ -527,12 +650,14 @@ const hasPwsh = spawnSync(
 ).status === 0
 const scenarioByName = new Map(scenarios.map(scenario => [scenario.name, scenario]))
 const compositionOwners = new Map<string, HeadlessScenario>()
+const compositionKey = (scenario: HeadlessScenario): string => `${scenario.manifest.profile}/${scenario.manifest.composition}`
 const headerPins = new Map<string, HeadlessScenario>()
 for (const scenario of scenarios) {
   const { composition, header } = scenario.manifest
   if (existsSync(join(scenario.dir, 'cordis.yml'))) {
-    if (compositionOwners.has(composition)) throw new Error(`headless composition ${composition} has multiple patch owners`)
-    compositionOwners.set(composition, scenario)
+    const key = compositionKey(scenario)
+    if (compositionOwners.has(key)) throw new Error(`headless composition ${key} has multiple patch owners`)
+    compositionOwners.set(key, scenario)
   }
   if (header.pin === true) {
     const key = `${composition}/${header.class}`
@@ -542,7 +667,7 @@ for (const scenario of scenarios) {
 }
 
 function ownerOf(scenario: HeadlessScenario): HeadlessScenario {
-  const owner = compositionOwners.get(scenario.manifest.composition)
+  const owner = compositionOwners.get(compositionKey(scenario))
   if (owner === undefined) throw new Error(`${scenario.name}: composition has no cordis.yml owner`)
   return owner
 }
@@ -679,7 +804,7 @@ async function verifyProviderCwdResume(
     configPath: patches[0] as string,
     tsconfigPath,
     binArgs: [
-      '--profile', 'headless',
+      '--profile', scenario.manifest.profile,
       ...patches.flatMap(file => ['--patch', isAbsolute(file) ? file : join(cwd, file)]),
       '--session-id', String(primary?.header.id), task,
     ],
@@ -757,9 +882,9 @@ async function verifyHeaders(scenario: HeadlessScenario, actualLogs: readonly Se
     }
     if (prompts.length > 0) {
       expect(
-        formatSystemPromptSnapshot(prompts[0] as string, prompts.slice(1)),
+        scrubWebUrl(formatSystemPromptSnapshot(prompts[0] as string, prompts.slice(1))),
         `${scenario.name}: system prompts`,
-      ).toBe(childPrompts.get(logIndex) ?? prompt)
+      ).toBe(scrubWebUrl(childPrompts.get(logIndex) ?? prompt))
     }
   }
 }
@@ -1009,7 +1134,7 @@ describe('headless recorded-session snapshots', () => {
       || mode === 'record' && scenario.manifest.recording === 'authored'
       || mode === 'record' && scenario.manifest.sessionFormat !== undefined
     const scenarioTest = skipped ? it.skip : mode === 'replay' ? it.concurrent : it
-    scenarioTest(`${mode}s ${scenario.name} through dsh --profile headless`, async () => {
+    scenarioTest(`${mode}s ${scenario.name} through dsh --profile ${scenario.manifest.profile}`, async () => {
       let fixtures = await fixtureSessions(scenario)
       const primaryFixture = fixtures[0]
       if (primaryFixture === undefined) throw new Error(`${scenario.name}: missing primary session fixture`)
@@ -1023,7 +1148,7 @@ describe('headless recorded-session snapshots', () => {
         model = modelFromSession(await readFile(join(pin.dir, await primaryFixtureFile(pin.dir)), 'utf8'))
       }
       const composition = ownerOf(scenario)
-      const baseComposition = compositionOwners.get('default')
+      const baseComposition = compositionOwners.get('headless/default')
       if (baseComposition === undefined) throw new Error('headless corpus has no default composition')
       let fixtureFiles = sessionFixtureNames(await readdir(scenario.dir))
       const replaying = mode !== 'record'
@@ -1044,16 +1169,49 @@ describe('headless recorded-session snapshots', () => {
       const spillRoot = await mkdtemp(join(tmpdir(), 'acp-snap-spill-'))
       const locatorRoot = snapshotSpillRoot(join(scenario.dir, fixtureFiles[0] as string))
       const mcpDemo = scenario.name === 'plugin-manager-mcp' ? await startHttpMcpFixture() : undefined
+      const bidRest = scenario.name === 'bid-web-workflow' ? await startBidRestFixture() : undefined
       let result: Awaited<ReturnType<typeof runLoaderSmoke>>
       try {
-        result = await runLoaderSmoke({
+        if (scenario.manifest.profile === 'bid-web') {
+          const cwd = await mkdtemp(join(tmpdir(), 'dsh-web-snap-'))
+          try {
+            await mkdir(join(cwd, patchRoot), { recursive: true })
+            patchSources.forEach((source, index) => {
+              if (source.endsWith('.snapshot.yml')) {
+                materializeProfilePatch(source, cwd, scenario.manifest.profile, join(cwd, patchRoot), index)
+              }
+            })
+            await seedWorkspace(scenario, cwd)
+            initialWorkspace = await captureWorkspaceSnapshot(cwd, { ignoredRootEntries: RUNTIME_WORKSPACE_ENTRIES })
+            const env = {
+              DSH_SNAPSHOT: replaying ? 'replay' : 'record',
+              DSH_SNAPSHOT_PROVIDER: model.provider,
+              DSH_SNAPSHOT_MODEL: model.model,
+              DSH_SNAPSHOT_SPILL_ROOT: spillRoot,
+              DSH_SNAPSHOT_SPILL_LOCATOR_ROOT: locatorRoot,
+              DSH_SNAPSHOT_FILE: join(scenario.dir, fixtureFiles[0] as string),
+              ...(replaying && scenario.manifest.replay?.override === true
+                ? { DSH_SNAPSHOT_OVERRIDE: join(scenario.dir, 'replay.override.json') }
+                : {}),
+              NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
+              DSH_TELEMETRY_DISABLED: '1',
+              BID_API_BASE_URL: bidRest?.url,
+              BID_DELEGATION_TOKEN: 'snapshot-token',
+            }
+            actualLogs = await runWebSnapshot({ scenario, cwd, patches, task, env })
+            finalWorkspace = await captureWorkspaceSnapshot(cwd, { ignoredRootEntries: RUNTIME_WORKSPACE_ENTRIES })
+            result = { stdout: `${finalTextFromSession(primaryFixture)}\n`, stderr: stderrFromSession(primaryFixture) }
+          } finally {
+            await rm(cwd, { recursive: true, force: true })
+          }
+        } else result = await runLoaderSmoke({
           label: `${scenario.name} headless snapshot`,
           tempDirPrefix: 'dsh-log-snap-',
           ...(scenario.manifest.workspace?.parent === 'outside-temp' ? { tempDirParent: outsideTempWorkspaceParent() } : {}),
           binScript: dshBin,
           configPath: join(baseComposition.dir, 'cordis.yml'),
           binArgs: [
-            '--profile', 'headless',
+            '--profile', scenario.manifest.profile,
             ...patches.flatMap(file => ['--patch', file]),
             task,
           ],
@@ -1085,13 +1243,17 @@ describe('headless recorded-session snapshots', () => {
             NODE_OPTIONS: [process.env.NODE_OPTIONS, '--disable-warning=ExperimentalWarning'].filter(Boolean).join(' '),
             DSH_TELEMETRY_DISABLED: '1',
             ...(mcpDemo === undefined ? {} : { DSH_MCP_DEMO_URL: mcpDemo.url }),
+            ...(bidRest === undefined ? {} : {
+              BID_API_BASE_URL: bidRest.url,
+              BID_DELEGATION_TOKEN: 'snapshot-token',
+            }),
           },
           prepare: async (cwd) => {
             if (scenario.manifest.workspace?.parent === 'outside-temp') assertWorkspaceOutsideTemp(cwd)
             await mkdir(join(cwd, patchRoot), { recursive: true })
             patchSources.forEach((source, index) => {
               if (source.endsWith('.snapshot.yml')) {
-                materializeProfilePatch(source, cwd, 'headless', join(cwd, patchRoot), index)
+                materializeProfilePatch(source, cwd, scenario.manifest.profile, join(cwd, patchRoot), index)
               }
             })
             if (mcpDemo !== undefined) {
@@ -1139,6 +1301,7 @@ describe('headless recorded-session snapshots', () => {
         })
       } finally {
         await mcpDemo?.close()
+        await bidRest?.close()
         await rm(spillRoot, { recursive: true, force: true })
       }
 

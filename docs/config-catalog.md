@@ -384,6 +384,30 @@ Depends on: [`LocalConfig`](#deepseek-aidsh-bash-local)
 
 Source: [`packages/shell/bash-sandbox/src/index.ts:36`](../packages/shell/bash-sandbox/src/index.ts)
 
+<a id="deepseek-aidsh-bid"></a>
+
+## `@deepseek-ai/dsh-bid`
+
+Requires: `fs`
+
+```ts config-catalog
+/** Deployment configuration for the central bid REST client. */
+export interface Config {
+  /** Base URL of the central bid REST service; a trailing slash is added when absent. */
+  apiBaseUrl: string
+  /** Environment variable holding the delegation JWT sent as a Bearer token. */
+  tokenEnv?: string
+  /** Per-request timeout in milliseconds for long parse/generate/export calls. */
+  timeoutMs?: number
+  /** Maximum accepted tender upload size in bytes. */
+  maxTenderBytes: number
+  /** Maximum downloaded DOCX export size in bytes. */
+  maxExportBytes: number
+}
+```
+
+Source: [`packages/bid/bid/src/index.ts:41`](../packages/bid/bid/src/index.ts)
+
 <a id="deepseek-aidsh-client-connection"></a>
 
 ## `@deepseek-ai/dsh-client-connection`
@@ -880,7 +904,7 @@ export interface Config {
 }
 ```
 
-Source: [`packages/fs/fs-local/src/index.ts:43`](../packages/fs/fs-local/src/index.ts)
+Source: [`packages/fs/fs-local/src/index.ts:44`](../packages/fs/fs-local/src/index.ts)
 
 <a id="deepseek-aidsh-fs-sandbox"></a>
 
@@ -3050,6 +3074,26 @@ export interface Config {
 
 Source: [`packages/shell/tool-bash-persistent/src/index.ts:435`](../packages/shell/tool-bash-persistent/src/index.ts)
 
+<a id="deepseek-aidsh-tool-bid"></a>
+
+## `@deepseek-ai/dsh-tool-bid`
+
+Requires: `tools` · `sessionProjections` · `bid` · `fs` · `jobs` · `subagents`
+
+```ts config-catalog
+/** File-reading configuration for streamed tender uploads. */
+export interface Config {
+  /** Maximum bytes requested from ctx.fs in one range read. */
+  readChunkBytes: number
+  /** One-shot subagent provider used to prepare section briefs. */
+  subagentProvider: string
+  /** Maximum section workers allowed concurrently. */
+  maxConcurrentSections: number
+}
+```
+
+Source: [`packages/bid/tool-bid/src/index.ts:53`](../packages/bid/tool-bid/src/index.ts)
+
 <a id="deepseek-aidsh-tool-fs"></a>
 
 ## `@deepseek-ai/dsh-tool-fs`
@@ -3775,6 +3819,8 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-api-remotes` — requires `typertGateway` ([`packages/api/remotes/src/index.ts`](../packages/api/remotes/src/index.ts))
 - `@deepseek-ai/dsh-api-workspace-controller` — requires `typert` · `workspaceRegistry` ([`packages/api/workspace-controller/src/index.ts`](../packages/api/workspace-controller/src/index.ts))
 - `@deepseek-ai/dsh-authorization` — requires `credentials` ([`packages/credentials/authorization/src/index.ts`](../packages/credentials/authorization/src/index.ts))
+- `@deepseek-ai/dsh-bid-client` — requires `typert` · `bid` ([`packages/bid/bid-client/src/index.ts`](../packages/bid/bid-client/src/index.ts))
+- `@deepseek-ai/dsh-bid-guard` — requires `tools` · `sessionProjections` ([`packages/bid/bid-guard/src/index.ts`](../packages/bid/bid-guard/src/index.ts))
 - `@deepseek-ai/dsh-browser-use` ([`packages/browser-use/browser-use/src/index.ts`](../packages/browser-use/browser-use/src/index.ts))
 - `@deepseek-ai/dsh-client-file-upload` — requires `agents` · `attachments` · `commands` · `connection` ([`packages/client/file-upload/src/index.ts`](../packages/client/file-upload/src/index.ts))
 - `@deepseek-ai/dsh-client-locale` ([`packages/client/locale/src/index.ts`](../packages/client/locale/src/index.ts))
@@ -3824,6 +3870,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-user-questions` ([`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workflow-run` ([`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workspace` ([`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts))
+- `@deepseek-ai/dsh-command-bid` — requires `commands` · `bid` · `attachments` ([`packages/bid/command-bid/src/index.ts`](../packages/bid/command-bid/src/index.ts))
 - `@deepseek-ai/dsh-command-compact` — requires `commands` · `compaction` ([`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts))
 - `@deepseek-ai/dsh-command-feedback` — requires `commands` ([`packages/feedback/command-feedback/src/index.ts`](../packages/feedback/command-feedback/src/index.ts))
 - `@deepseek-ai/dsh-command-goal` — requires `commands` · `goals` ([`packages/goal/command-goal/src/index.ts`](../packages/goal/command-goal/src/index.ts))
@@ -3894,6 +3941,7 @@ Imported as libraries by other packages; a `cordis.yml` cannot load them.
 - `@deepseek-ai/dsh-app-boot` ([`packages/boot/app-boot/src/index.ts`](../packages/boot/app-boot/src/index.ts))
 - `@deepseek-ai/dsh-atomic-write` ([`packages/util/atomic-write/src/index.ts`](../packages/util/atomic-write/src/index.ts))
 - `@deepseek-ai/dsh-base` ([`packages/bundle/base/src/index.ts`](../packages/bundle/base/src/index.ts))
+- `@deepseek-ai/dsh-bid-web-profile` ([`packages/bid/bid-web-profile/src/index.ts`](../packages/bid/bid-web-profile/src/index.ts))
 - `@deepseek-ai/dsh-brand` ([`packages/util/brand/src/index.ts`](../packages/util/brand/src/index.ts))
 - `@deepseek-ai/dsh-chunked-list` ([`packages/util/chunked-list/src/index.ts`](../packages/util/chunked-list/src/index.ts))
 - `@deepseek-ai/dsh-client-store` ([`packages/client/store/src/index.ts`](../packages/client/store/src/index.ts))

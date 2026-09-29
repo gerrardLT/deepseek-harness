@@ -27,6 +27,10 @@ The [format references](persistence-changes/historical-formats/README.md) cover 
 | `event:approval/policy` | event | `26718e15e7e395bce9642dba5bbe09b3b1a4ce2213d20d566cd9207d7fc5fb78` | [`event:approval/policy`](#persistence-type-eventapprovalpolicy) |
 | `event:assistant/attempt` | event | `c80c89da83c46db7a454f034c10f969e03cfb574859c7316e5bff683f5a14b0e` | [`event:assistant/attempt`](#persistence-type-eventassistantattempt) |
 | `event:assistant/message` | event | `1169b301aaabcd992657b93ec93750c43175dda81ada5cac086f14f2eaaeed6d` | [`event:assistant/message`](#persistence-type-eventassistantmessage) |
+| `event:bid/capability-matched` | event | `0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1` | [`event:bid/capability-matched`](#persistence-type-eventbidcapability-matched) |
+| `event:bid/export-produced` | event | `5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e` | [`event:bid/export-produced`](#persistence-type-eventbidexport-produced) |
+| `event:bid/section-generated` | event | `0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5` | [`event:bid/section-generated`](#persistence-type-eventbidsection-generated) |
+| `event:bid/tender-loaded` | event | `c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7` | [`event:bid/tender-loaded`](#persistence-type-eventbidtender-loaded) |
 | `event:command/done` | event | `15196447222782e773eb943c92b18316ce96b9af0f0cfddb6e57ba8274ecc5ff` | [`event:command/done`](#persistence-type-eventcommanddone) |
 | `event:command/run` | event | `37184378c6439257d105c4e2022d80fc9c3a3f7c7f6ac661b00bc9f18d871006` | [`event:command/run`](#persistence-type-eventcommandrun) |
 | `event:compaction/end` | event | `b0127044ab31a702bddfd785d345f5abd7a70876746e895ce443afa3e60ddf2d` | [`event:compaction/end`](#persistence-type-eventcompactionend) |
@@ -311,6 +315,52 @@ Source: [`packages/core/session/src/types.ts:335`](../packages/core/session/src/
 Types: [TokenUsage](subsystems/llm-streaming.md)
 
 Source: [`packages/core/session/src/types.ts:321`](../packages/core/session/src/types.ts)
+
+### `bid/*`
+
+<a id="bidcapability-matched--log-only"></a>
+
+#### `bid/capability-matched` — log-only
+
+```ts persistence-catalog
+/** Capabilities were matched against the loaded tender; latest match wins. */
+'bid/capability-matched': { match: BidMatch }
+```
+
+Source: [`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
+
+<a id="bidexport-produced--log-only"></a>
+
+#### `bid/export-produced` — log-only
+
+```ts persistence-catalog
+/** A tender's technical bid was exported; latest export wins. */
+'bid/export-produced': { artifact: BidExport }
+```
+
+Source: [`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
+
+<a id="bidsection-generated--log-only"></a>
+
+#### `bid/section-generated` — log-only
+
+```ts persistence-catalog
+/** A technical-bid section was generated or revised; folds into the outline. */
+'bid/section-generated': { section: BidSection }
+```
+
+Source: [`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
+
+<a id="bidtender-loaded--log-only"></a>
+
+#### `bid/tender-loaded` — log-only
+
+```ts persistence-catalog
+/** A tender was parsed and loaded; latest load wins on replay. */
+'bid/tender-loaded': { tender: BidTender }
+```
+
+Source: [`packages/bid/bid/src/types.ts:200`](../packages/bid/bid/src/types.ts)
 
 ### `command/*`
 
@@ -1438,6 +1488,38 @@ SHA-256: `17aae616ef020b8b9f011ec398ec935450fb06d3e2a0722c456f63aeaf5ff728`
 
 `"at"`
 
+<a id="persistence-type-bidcapability-matched"></a>
+
+### `"bid/capability-matched"`
+
+SHA-256: `e788a01ce424454537c79c65bbaecf236039d92b86450655e31f38e9e9e76033`
+
+`"bid/capability-matched"`
+
+<a id="persistence-type-bidexport-produced"></a>
+
+### `"bid/export-produced"`
+
+SHA-256: `aae165a14b189456e9f071128ac1e3cdab9c1a65101a56ba50263f17a9073702`
+
+`"bid/export-produced"`
+
+<a id="persistence-type-bidsection-generated"></a>
+
+### `"bid/section-generated"`
+
+SHA-256: `b52e9bb9f10469ebf49a91ce155bd531584ae45bab17fe45be4299af222d7786`
+
+`"bid/section-generated"`
+
+<a id="persistence-type-bidtender-loaded"></a>
+
+### `"bid/tender-loaded"`
+
+SHA-256: `a02ef27069d1547d9ece91ac32bce473a1e40c15b5fa2697fd53c8136ec518e1`
+
+`"bid/tender-loaded"`
+
 <a id="persistence-type-block"></a>
 
 ### `"block"`
@@ -1677,6 +1759,14 @@ SHA-256: `26c879bdd130e8b8683a6ce588414fad2244783d6573ca399fa0de184a2b0bb1`
 SHA-256: `b38f206d59bad891fa58c89f97a0036987b3defe7685acbd318fa55eb85f9751`
 
 `"disposed"`
+
+<a id="persistence-type-draft"></a>
+
+### `"draft"`
+
+SHA-256: `4715b8fc59c832514a51bb510c4912f8c1d3e9b7359dad86866b428d2e76fa9a`
+
+`"draft"`
 
 <a id="persistence-type-edit"></a>
 
@@ -2116,7 +2206,7 @@ Sources: [`packages/llm/llm/src/assistant-stream.ts:21`](../packages/llm/llm/src
 
 | Property | Presence | Type |
 |---|---|---|
-| `dt` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `dt` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `index` | required | `number` |
 | `texts` | required | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
 | `time0` | required | `number` |
@@ -2140,7 +2230,7 @@ Sources: [`packages/llm/llm/src/assistant-stream.ts:28`](../packages/llm/llm/src
 
 | Property | Presence | Type |
 |---|---|---|
-| `dt` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `dt` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `index` | required | `number` |
 | `texts` | required | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
 | `time0` | required | `number` |
@@ -2157,7 +2247,7 @@ Sources: [`packages/llm/llm/src/assistant-stream.ts:35`](../packages/llm/llm/src
 | Property | Presence | Type |
 |---|---|---|
 | `args` | required | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
-| `dt` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `dt` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `id` | required | `string` |
 | `index` | required | `number` |
 | `name` | optional | `string` |
@@ -2379,6 +2469,130 @@ Sources: [`packages/core/session/src/types.ts:321`](../packages/core/session/src
 | `turn` | required | `number` |
 | `usage` | optional | [`packages/llm/llm/src/types.ts#TokenUsage`](#persistence-type-packagesllmllmsrctypeststokenusage) |
 
+<a id="persistence-type-eventbidcapability-matched"></a>
+
+### `event:bid/capability-matched`
+
+SHA-256: `0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1`
+
+| Property | Presence | Type |
+|---|---|---|
+| `data` | required | [`event:bid/capability-matched.data`](#persistence-type-eventbidcapability-matcheddata) |
+| `ignorable` | optional | `true` |
+| `seq` | required | `number` |
+| `time` | required | `number` |
+| `type` | required | `"bid/capability-matched"` |
+
+<a id="persistence-type-eventbidcapability-matcheddata"></a>
+
+### `event:bid/capability-matched.data`
+
+SHA-256: `58c16719eecda4fa349aa2b109d3e9ef5a53fb18cde7681b72c4b3d509d65187`
+
+Sources: [`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `match` | required | [`packages/bid/bid/src/types.ts#BidMatch`](#persistence-type-packagesbidbidsrctypestsbidmatch) |
+
+<a id="persistence-type-eventbidexport-produced"></a>
+
+### `event:bid/export-produced`
+
+SHA-256: `5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e`
+
+| Property | Presence | Type |
+|---|---|---|
+| `data` | required | [`event:bid/export-produced.data`](#persistence-type-eventbidexport-produceddata) |
+| `ignorable` | optional | `true` |
+| `seq` | required | `number` |
+| `time` | required | `number` |
+| `type` | required | `"bid/export-produced"` |
+
+<a id="persistence-type-eventbidexport-produceddata"></a>
+
+### `event:bid/export-produced.data`
+
+SHA-256: `fcc65db165e284c3dff9e0d7ed136c2ddc620e3380fdf9fb50a91c2ff8d44d93`
+
+Sources: [`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `artifact` | required | [`packages/bid/bid/src/types.ts#BidExport`](#persistence-type-packagesbidbidsrctypestsbidexport) |
+
+<a id="persistence-type-eventbidsection-generated"></a>
+
+### `event:bid/section-generated`
+
+SHA-256: `0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5`
+
+| Property | Presence | Type |
+|---|---|---|
+| `data` | required | [`event:bid/section-generated.data`](#persistence-type-eventbidsection-generateddata) |
+| `ignorable` | optional | `true` |
+| `seq` | required | `number` |
+| `time` | required | `number` |
+| `type` | required | `"bid/section-generated"` |
+
+<a id="persistence-type-eventbidsection-generateddata"></a>
+
+### `event:bid/section-generated.data`
+
+SHA-256: `8f18a915975e27940db90d76765c160068f3cbeada299c4977930ce02f0ee250`
+
+Sources: [`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `section` | required | [`packages/bid/bid/src/types.ts#BidSection`](#persistence-type-packagesbidbidsrctypestsbidsection) |
+
+<a id="persistence-type-eventbidsection-generateddatasectionstatus"></a>
+
+### `event:bid/section-generated.data.section.status`
+
+SHA-256: `1bdec3eac7943ca72e4d967104dc52957898d207b2bbf5b577a0af3c03f10a8c`
+
+One of:
+
+- `"draft"`
+- `"final"`
+- `"reviewed"`
+
+<a id="persistence-type-eventbidtender-loaded"></a>
+
+### `event:bid/tender-loaded`
+
+SHA-256: `c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7`
+
+| Property | Presence | Type |
+|---|---|---|
+| `data` | required | [`event:bid/tender-loaded.data`](#persistence-type-eventbidtender-loadeddata) |
+| `ignorable` | optional | `true` |
+| `seq` | required | `number` |
+| `time` | required | `number` |
+| `type` | required | `"bid/tender-loaded"` |
+
+<a id="persistence-type-eventbidtender-loadeddata"></a>
+
+### `event:bid/tender-loaded.data`
+
+SHA-256: `4b469b68b45bdbed3b0a6d580c2797d415e97ced192ae20e052bf32f36ca5761`
+
+Sources: [`packages/bid/bid/src/types.ts:200`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `tender` | required | [`packages/bid/bid/src/types.ts#BidTender`](#persistence-type-packagesbidbidsrctypestsbidtender) |
+
+<a id="persistence-type-eventbidtender-loadeddatatendersections"></a>
+
+### `event:bid/tender-loaded.data.tender.sections`
+
+SHA-256: `8dee7aa64ecfae9385138d5c808d34ea8966aa43213afa9f0d60e88d8ad99b30`
+
+Array of [`packages/bid/bid/src/types.ts#BidTenderSectionRef`](#persistence-type-packagesbidbidsrctypestsbidtendersectionref).
+
 <a id="persistence-type-eventcommanddone"></a>
 
 ### `event:command/done`
@@ -2515,7 +2729,7 @@ Sources: [`packages/compaction/compaction/src/types.ts:82`](../packages/compacti
 | Property | Presence | Type |
 |---|---|---|
 | `shadowedRange` | required | [`event:compaction/prune.data.shadowedRange`](#persistence-type-eventcompactionprunedatashadowedrange) |
-| `shadowedSeqs` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `shadowedSeqs` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `shadowedTokenCount` | required | `number` |
 
 <a id="persistence-type-eventcompactionprunedatashadowedrange"></a>
@@ -2599,7 +2813,7 @@ SHA-256: `9ff2ad8dddb836f75e8f6197fff2371323dfc396c3c6fb667e6e0b42fda79a5c`
 | `provider` | required | `string` |
 | `rawOutput` | required | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
 | `shadowedRange` | required | [`event:compaction/prune.data.shadowedRange`](#persistence-type-eventcompactionprunedatashadowedrange) |
-| `shadowedSeqs` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `shadowedSeqs` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `shadowedTokenCount` | required | `number` |
 | `sourceCommandId` | optional | `string` |
 | `summary` | required | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
@@ -2619,7 +2833,7 @@ SHA-256: `3aa261c8516b5c955ed12080e6257a56cbe513f6c9f0ac9274c12e96c196ebca`
 | `provider` | required | `string` |
 | `rawOutput` | optional | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
 | `shadowedRange` | required | [`event:compaction/prune.data.shadowedRange`](#persistence-type-eventcompactionprunedatashadowedrange) |
-| `shadowedSeqs` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `shadowedSeqs` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `shadowedTokenCount` | required | `number` |
 | `sourceCommandId` | optional | `string` |
 | `summary` | required | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
@@ -3350,7 +3564,7 @@ SHA-256: `69becfb6b2d3fd5da91518089454cae8ef33f1835637ec44dde35dd077fd4bae`
 | `data` | required | [`event:system/message.data`](#persistence-type-eventsystemmessagedata) |
 | `ignorable` | optional | `true` |
 | `seq` | required | `number` |
-| `sourceEventSeqs` | optional | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | optional | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | required | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | required | `number` |
 | `type` | required | `"system/message"` |
@@ -3694,7 +3908,7 @@ SHA-256: `29af48b840d0cd9e48b6f50bf3b354f8f6340607c5b99220a48e74f60beac9e2`
 | `data` | required | [`event:tool/result.data`](#persistence-type-eventtoolresultdata) |
 | `ignorable` | optional | `true` |
 | `seq` | required | `number` |
-| `sourceEventSeqs` | optional | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | optional | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | required | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | required | `number` |
 | `type` | required | `"tool/result"` |
@@ -3937,7 +4151,7 @@ SHA-256: `314765bdff29c7862fb6ce820f1773563ba3094a680d163ea21180a2591b8578`
 | `data` | required | [`packages/llm/llm/src/message.ts#UserMessage`](#persistence-type-packagesllmllmsrcmessagetsusermessage) |
 | `ignorable` | optional | `true` |
 | `seq` | required | `number` |
-| `sourceEventSeqs` | optional | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | optional | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | required | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | required | `number` |
 | `type` | required | `"user/message"` |
@@ -4118,6 +4332,14 @@ SHA-256: `c99e20441bf15341e9db54385e558e5c03d21dff2eb1ac08ccbf47c2d8747954`
 SHA-256: `277b61f9c6f8170425fa6ffe06cfa14376757a896a4749cb82a687d7364c4fc9`
 
 `"file"`
+
+<a id="persistence-type-final"></a>
+
+### `"final"`
+
+SHA-256: `6b9cb60af5039c92daef29dc251a6a5b49a45a9e29f94dae9719f52d2359b975`
+
+`"final"`
 
 <a id="persistence-type-finish"></a>
 
@@ -4472,6 +4694,79 @@ One of:
 - `"image/png"`
 - `"image/webp"`
 
+<a id="persistence-type-packagesbidbidsrctypestsbidexport"></a>
+
+### `packages/bid/bid/src/types.ts#BidExport`
+
+SHA-256: `7c5ab319a37e4bd26d5b24c931563230650cc8cc48eaa83bc4d6d311686c63fb`
+
+Sources: [`packages/bid/bid/src/types.ts:75`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `docxPath` | required | `string` |
+| `exportId` | required | `string` |
+| `pages` | required | `number` |
+| `tenderId` | optional | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidmatch"></a>
+
+### `packages/bid/bid/src/types.ts#BidMatch`
+
+SHA-256: `740f859b1474ce5e8705d28da20e096a00dc0061e65e2b0bfebb7db4eaeb09e0`
+
+Sources: [`packages/bid/bid/src/types.ts:63`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `gaps` | required | `number` |
+| `matched` | required | `number` |
+| `risks` | required | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
+| `tenderId` | required | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidsection"></a>
+
+### `packages/bid/bid/src/types.ts#BidSection`
+
+SHA-256: `52ecee56150a8055f723d2e8ba368e75da1fc1d2741782c9e0a1b1dbefdb5a00`
+
+Sources: [`packages/bid/bid/src/types.ts:51`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `sectionId` | required | `string` |
+| `status` | required | [`event:bid/section-generated.data.section.status`](#persistence-type-eventbidsection-generateddatasectionstatus) |
+| `tenderId` | optional | `string` |
+| `title` | required | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidtender"></a>
+
+### `packages/bid/bid/src/types.ts#BidTender`
+
+SHA-256: `b5e7f7164523047d4f38f29b45570d44e3f867739c68f65bfe2442dcb63379ef`
+
+Sources: [`packages/bid/bid/src/types.ts:39`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `sectionCount` | required | `number` |
+| `sections` | optional | [`event:bid/tender-loaded.data.tender.sections`](#persistence-type-eventbidtender-loadeddatatendersections) |
+| `tenderId` | required | `string` |
+| `title` | required | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidtendersectionref"></a>
+
+### `packages/bid/bid/src/types.ts#BidTenderSectionRef`
+
+SHA-256: `d21f3aac002f36f1eed800088c9c4afa7bad2fcf855ca2e2f83ee70c84a90109`
+
+Sources: [`packages/bid/bid/src/types.ts:31`](../packages/bid/bid/src/types.ts)
+
+| Property | Presence | Type |
+|---|---|---|
+| `sectionId` | required | `string` |
+| `title` | required | `string` |
+
 <a id="persistence-type-packagescompactioncompaction-image-offloadsrcprojectiontsimageoffloadtarget"></a>
 
 ### `packages/compaction/compaction-image-offload/src/projection.ts#ImageOffloadTarget`
@@ -4482,7 +4777,7 @@ Sources: [`packages/compaction/compaction-image-offload/src/projection.ts:9`](..
 
 | Property | Presence | Type |
 |---|---|---|
-| `imageIndexes` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `imageIndexes` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `seq` | required | `number` |
 
 <a id="persistence-type-packagescontextagent-instructionssrcrendertsagentinstructionchange"></a>
@@ -5642,7 +5937,7 @@ Sources: [`packages/session/session-title-llm/src/index.ts:27`](../packages/sess
 | Property | Presence | Type |
 |---|---|---|
 | `maxTokens` | required | `number` |
-| `messageSeqs` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `messageSeqs` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `messages` | required | [`event:session/title-llm-request.data.messages`](#persistence-type-eventsessiontitle-llm-requestdatamessages) |
 | `route` | required | [`packages/session/session-title/src/types.ts#SessionTitleModelIdentity`](#persistence-type-packagessessionsession-titlesrctypestssessiontitlemodelidentity) |
 | `system` | required | `string` |
@@ -5658,7 +5953,7 @@ Sources: [`packages/session/session-title/src/types.ts:41`](../packages/session/
 
 | Property | Presence | Type |
 |---|---|---|
-| `messageSeqs` | required | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `messageSeqs` | required | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `source` | required | [`packages/session/session-title/src/types.ts#SessionTitleSource`](#persistence-type-packagessessionsession-titlesrctypestssessiontitlesource) |
 | `title` | required | `string` |
 
@@ -6111,6 +6406,14 @@ SHA-256: `34d1ab5c5df378186d6054b1a1beea9a41e41965d6f336f0bc0025c441a82e66`
 
 `"resume"`
 
+<a id="persistence-type-reviewed"></a>
+
+### `"reviewed"`
+
+SHA-256: `59c39fbf9ed537c48817524aabecc59711b7dbf3ec6707086407dca07bf52388`
+
+`"reviewed"`
+
 <a id="persistence-type-sandboxmode"></a>
 
 ### `"sandbox/mode"`
@@ -6191,7 +6494,7 @@ SHA-256: `5776e5553ff2dfe3f5bc202dbb1e7c9f93e35a531aebb7764c23b2b6153b2ccc`
 
 One of:
 
-- [`SessionEventEnvelope[39]`](#persistence-type-sessioneventenvelope39)
+- [`SessionEventEnvelope[43]`](#persistence-type-sessioneventenvelope43)
 - [`SessionEventEnvelope[6]`](#persistence-type-sessioneventenvelope6)
 - [`SessionEventEnvelope[0]`](#persistence-type-sessioneventenvelope0)
 
@@ -6208,9 +6511,9 @@ SHA-256: `e3e77b26f0148755a505f5b8ea843a3be117827d4703bb5754d9dc8ddbef521f`
 | `time` | required | `number` |
 | `type` | required | `string` |
 
-<a id="persistence-type-sessioneventenvelope39"></a>
+<a id="persistence-type-sessioneventenvelope43"></a>
 
-### `SessionEventEnvelope[39]`
+### `SessionEventEnvelope[43]`
 
 SHA-256: `998f22585a5d73ec005365e203f07fc3b3a029e82323fdda3fd7f13b0a9639d0`
 
@@ -6218,14 +6521,14 @@ SHA-256: `998f22585a5d73ec005365e203f07fc3b3a029e82323fdda3fd7f13b0a9639d0`
 |---|---|---|
 | `ignorable` | optional | `true` |
 | `seq` | required | `number` |
-| `sourceEventSeqs` | optional | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | optional | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | required | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | required | `number` |
 | `type` | required | `string` |
 
-<a id="persistence-type-sessioneventenvelope39sourceeventseqs"></a>
+<a id="persistence-type-sessioneventenvelope43sourceeventseqs"></a>
 
-### `SessionEventEnvelope[39].sourceEventSeqs`
+### `SessionEventEnvelope[43].sourceEventSeqs`
 
 SHA-256: `5d03ba38734809bcbd2a55221bd938b3b3fc34b49bb686c6113e9e4931e3aa78`
 
@@ -6337,7 +6640,7 @@ SHA-256: `57f3f606ff8b6c84d9c443faace9d1dd10cca0354f37a4f515ef075f7c351b90`
 
 SHA-256: `4cd48f3e5108bd6ebedf7301c3638839b8b2b9db8dbd493974177fbdeb91a01b`
 
-Sources: [`packages/api/session-controller/src/types.ts:376`](../packages/api/session-controller/src/types.ts) · [`packages/attachment/attachment/src/brand.ts:6`](../packages/attachment/attachment/src/brand.ts) · [`packages/compaction/compaction/src/brand.ts:4`](../packages/compaction/compaction/src/brand.ts) · [`packages/core/session/src/types.ts:19`](../packages/core/session/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:20`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:32`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:8`](../packages/experimental/agent-team/src/types.ts) · [`packages/feedback/message-feedback/src/types.ts:14`](../packages/feedback/message-feedback/src/types.ts) · [`packages/goal/goal/src/types.ts:17`](../packages/goal/goal/src/types.ts) · [`packages/interaction/commands/src/brand.ts:31`](../packages/interaction/commands/src/brand.ts) · [`packages/interaction/user-approval/src/types.ts:17`](../packages/interaction/user-approval/src/types.ts) · [`packages/llm/llm-retry/src/brand.ts:4`](../packages/llm/llm-retry/src/brand.ts) · [`packages/llm/llm/src/brand.ts:16`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:31`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:43`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:67`](../packages/llm/llm/src/brand.ts) · [`packages/schedule/schedule/src/types.ts:10`](../packages/schedule/schedule/src/types.ts) · [`packages/session/session-title/src/index.ts:42`](../packages/session/session-title/src/index.ts) · [`packages/session/session-title/src/types.ts:17`](../packages/session/session-title/src/types.ts) · [`packages/webhook/webhook/src/brand.ts:12`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:6`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:9`](../packages/webhook/webhook/src/brand.ts) · [`packages/workflow/workflow/src/types.ts:13`](../packages/workflow/workflow/src/types.ts)
+Sources: [`packages/api/session-controller/src/types.ts:376`](../packages/api/session-controller/src/types.ts) · [`packages/attachment/attachment/src/brand.ts:6`](../packages/attachment/attachment/src/brand.ts) · [`packages/bid/bid/src/types.ts:22`](../packages/bid/bid/src/types.ts) · [`packages/bid/bid/src/types.ts:25`](../packages/bid/bid/src/types.ts) · [`packages/bid/bid/src/types.ts:28`](../packages/bid/bid/src/types.ts) · [`packages/compaction/compaction/src/brand.ts:4`](../packages/compaction/compaction/src/brand.ts) · [`packages/core/session/src/types.ts:19`](../packages/core/session/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:20`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:32`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:8`](../packages/experimental/agent-team/src/types.ts) · [`packages/feedback/message-feedback/src/types.ts:14`](../packages/feedback/message-feedback/src/types.ts) · [`packages/goal/goal/src/types.ts:17`](../packages/goal/goal/src/types.ts) · [`packages/interaction/commands/src/brand.ts:31`](../packages/interaction/commands/src/brand.ts) · [`packages/interaction/user-approval/src/types.ts:17`](../packages/interaction/user-approval/src/types.ts) · [`packages/llm/llm-retry/src/brand.ts:4`](../packages/llm/llm-retry/src/brand.ts) · [`packages/llm/llm/src/brand.ts:16`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:31`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:43`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:67`](../packages/llm/llm/src/brand.ts) · [`packages/schedule/schedule/src/types.ts:10`](../packages/schedule/schedule/src/types.ts) · [`packages/session/session-title/src/index.ts:42`](../packages/session/session-title/src/index.ts) · [`packages/session/session-title/src/types.ts:17`](../packages/session/session-title/src/types.ts) · [`packages/webhook/webhook/src/brand.ts:12`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:6`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:9`](../packages/webhook/webhook/src/brand.ts) · [`packages/workflow/workflow/src/types.ts:13`](../packages/workflow/workflow/src/types.ts)
 
 `string`
 

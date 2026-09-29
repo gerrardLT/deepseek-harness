@@ -29,6 +29,10 @@
 | `event:approval/policy` | event | `26718e15e7e395bce9642dba5bbe09b3b1a4ce2213d20d566cd9207d7fc5fb78` | [`event:approval/policy`](#persistence-type-eventapprovalpolicy) |
 | `event:assistant/attempt` | event | `c80c89da83c46db7a454f034c10f969e03cfb574859c7316e5bff683f5a14b0e` | [`event:assistant/attempt`](#persistence-type-eventassistantattempt) |
 | `event:assistant/message` | event | `1169b301aaabcd992657b93ec93750c43175dda81ada5cac086f14f2eaaeed6d` | [`event:assistant/message`](#persistence-type-eventassistantmessage) |
+| `event:bid/capability-matched` | event | `0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1` | [`event:bid/capability-matched`](#persistence-type-eventbidcapability-matched) |
+| `event:bid/export-produced` | event | `5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e` | [`event:bid/export-produced`](#persistence-type-eventbidexport-produced) |
+| `event:bid/section-generated` | event | `0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5` | [`event:bid/section-generated`](#persistence-type-eventbidsection-generated) |
+| `event:bid/tender-loaded` | event | `c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7` | [`event:bid/tender-loaded`](#persistence-type-eventbidtender-loaded) |
 | `event:command/done` | event | `15196447222782e773eb943c92b18316ce96b9af0f0cfddb6e57ba8274ecc5ff` | [`event:command/done`](#persistence-type-eventcommanddone) |
 | `event:command/run` | event | `37184378c6439257d105c4e2022d80fc9c3a3f7c7f6ac661b00bc9f18d871006` | [`event:command/run`](#persistence-type-eventcommandrun) |
 | `event:compaction/end` | event | `b0127044ab31a702bddfd785d345f5abd7a70876746e895ce443afa3e60ddf2d` | [`event:compaction/end`](#persistence-type-eventcompactionend) |
@@ -313,6 +317,52 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 类型：[TokenUsage](subsystems/llm-streaming.zh.md)
 
 来源：[`packages/core/session/src/types.ts:321`](../packages/core/session/src/types.ts)
+
+### `bid/*`
+
+<a id="bidcapability-matched--log-only"></a>
+
+#### `bid/capability-matched` — log-only
+
+```ts persistence-catalog
+/** Capabilities were matched against the loaded tender; latest match wins. */
+'bid/capability-matched': { match: BidMatch }
+```
+
+来源：[`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
+
+<a id="bidexport-produced--log-only"></a>
+
+#### `bid/export-produced` — log-only
+
+```ts persistence-catalog
+/** A tender's technical bid was exported; latest export wins. */
+'bid/export-produced': { artifact: BidExport }
+```
+
+来源：[`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
+
+<a id="bidsection-generated--log-only"></a>
+
+#### `bid/section-generated` — log-only
+
+```ts persistence-catalog
+/** A technical-bid section was generated or revised; folds into the outline. */
+'bid/section-generated': { section: BidSection }
+```
+
+来源：[`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
+
+<a id="bidtender-loaded--log-only"></a>
+
+#### `bid/tender-loaded` — log-only
+
+```ts persistence-catalog
+/** A tender was parsed and loaded; latest load wins on replay. */
+'bid/tender-loaded': { tender: BidTender }
+```
+
+来源：[`packages/bid/bid/src/types.ts:200`](../packages/bid/bid/src/types.ts)
 
 ### `command/*`
 
@@ -1440,6 +1490,38 @@ SHA-256: `17aae616ef020b8b9f011ec398ec935450fb06d3e2a0722c456f63aeaf5ff728`
 
 `"at"`
 
+<a id="persistence-type-bidcapability-matched"></a>
+
+### `"bid/capability-matched"`
+
+SHA-256: `e788a01ce424454537c79c65bbaecf236039d92b86450655e31f38e9e9e76033`
+
+`"bid/capability-matched"`
+
+<a id="persistence-type-bidexport-produced"></a>
+
+### `"bid/export-produced"`
+
+SHA-256: `aae165a14b189456e9f071128ac1e3cdab9c1a65101a56ba50263f17a9073702`
+
+`"bid/export-produced"`
+
+<a id="persistence-type-bidsection-generated"></a>
+
+### `"bid/section-generated"`
+
+SHA-256: `b52e9bb9f10469ebf49a91ce155bd531584ae45bab17fe45be4299af222d7786`
+
+`"bid/section-generated"`
+
+<a id="persistence-type-bidtender-loaded"></a>
+
+### `"bid/tender-loaded"`
+
+SHA-256: `a02ef27069d1547d9ece91ac32bce473a1e40c15b5fa2697fd53c8136ec518e1`
+
+`"bid/tender-loaded"`
+
 <a id="persistence-type-block"></a>
 
 ### `"block"`
@@ -1679,6 +1761,14 @@ SHA-256: `26c879bdd130e8b8683a6ce588414fad2244783d6573ca399fa0de184a2b0bb1`
 SHA-256: `b38f206d59bad891fa58c89f97a0036987b3defe7685acbd318fa55eb85f9751`
 
 `"disposed"`
+
+<a id="persistence-type-draft"></a>
+
+### `"draft"`
+
+SHA-256: `4715b8fc59c832514a51bb510c4912f8c1d3e9b7359dad86866b428d2e76fa9a`
+
+`"draft"`
 
 <a id="persistence-type-edit"></a>
 
@@ -2118,7 +2208,7 @@ SHA-256: `e72269f931559e901e5e8fe1cfcbd0669fb795f43cc038ff39fba62f60403c33`
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
-| `dt` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `dt` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `index` | 必需 | `number` |
 | `texts` | 必需 | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
 | `time0` | 必需 | `number` |
@@ -2142,7 +2232,7 @@ SHA-256: `71bb3254ec8f1e491ce63b762a7b5f18709de23aa4e8abcc8b886f4b6ce051dd`
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
-| `dt` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `dt` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `index` | 必需 | `number` |
 | `texts` | 必需 | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
 | `time0` | 必需 | `number` |
@@ -2159,7 +2249,7 @@ SHA-256: `3860b4757d512a2869be833acb0faf834335b1b056bf3f83df5474dce95f8fa6`
 | 属性 | 存在性 | 类型 |
 |---|---|---|
 | `args` | 必需 | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
-| `dt` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `dt` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `id` | 必需 | `string` |
 | `index` | 必需 | `number` |
 | `name` | 可选 | `string` |
@@ -2381,6 +2471,130 @@ SHA-256: `77b8491f946edfc8cc77ebae3ba49183759da31ba2dfa83d4c9e9e618c4b91d2`
 | `turn` | 必需 | `number` |
 | `usage` | 可选 | [`packages/llm/llm/src/types.ts#TokenUsage`](#persistence-type-packagesllmllmsrctypeststokenusage) |
 
+<a id="persistence-type-eventbidcapability-matched"></a>
+
+### `event:bid/capability-matched`
+
+SHA-256: `0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1`
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `data` | 必需 | [`event:bid/capability-matched.data`](#persistence-type-eventbidcapability-matcheddata) |
+| `ignorable` | 可选 | `true` |
+| `seq` | 必需 | `number` |
+| `time` | 必需 | `number` |
+| `type` | 必需 | `"bid/capability-matched"` |
+
+<a id="persistence-type-eventbidcapability-matcheddata"></a>
+
+### `event:bid/capability-matched.data`
+
+SHA-256: `58c16719eecda4fa349aa2b109d3e9ef5a53fb18cde7681b72c4b3d509d65187`
+
+来源：[`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `match` | 必需 | [`packages/bid/bid/src/types.ts#BidMatch`](#persistence-type-packagesbidbidsrctypestsbidmatch) |
+
+<a id="persistence-type-eventbidexport-produced"></a>
+
+### `event:bid/export-produced`
+
+SHA-256: `5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e`
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `data` | 必需 | [`event:bid/export-produced.data`](#persistence-type-eventbidexport-produceddata) |
+| `ignorable` | 可选 | `true` |
+| `seq` | 必需 | `number` |
+| `time` | 必需 | `number` |
+| `type` | 必需 | `"bid/export-produced"` |
+
+<a id="persistence-type-eventbidexport-produceddata"></a>
+
+### `event:bid/export-produced.data`
+
+SHA-256: `fcc65db165e284c3dff9e0d7ed136c2ddc620e3380fdf9fb50a91c2ff8d44d93`
+
+来源：[`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `artifact` | 必需 | [`packages/bid/bid/src/types.ts#BidExport`](#persistence-type-packagesbidbidsrctypestsbidexport) |
+
+<a id="persistence-type-eventbidsection-generated"></a>
+
+### `event:bid/section-generated`
+
+SHA-256: `0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5`
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `data` | 必需 | [`event:bid/section-generated.data`](#persistence-type-eventbidsection-generateddata) |
+| `ignorable` | 可选 | `true` |
+| `seq` | 必需 | `number` |
+| `time` | 必需 | `number` |
+| `type` | 必需 | `"bid/section-generated"` |
+
+<a id="persistence-type-eventbidsection-generateddata"></a>
+
+### `event:bid/section-generated.data`
+
+SHA-256: `8f18a915975e27940db90d76765c160068f3cbeada299c4977930ce02f0ee250`
+
+来源：[`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `section` | 必需 | [`packages/bid/bid/src/types.ts#BidSection`](#persistence-type-packagesbidbidsrctypestsbidsection) |
+
+<a id="persistence-type-eventbidsection-generateddatasectionstatus"></a>
+
+### `event:bid/section-generated.data.section.status`
+
+SHA-256: `1bdec3eac7943ca72e4d967104dc52957898d207b2bbf5b577a0af3c03f10a8c`
+
+以下类型之一：
+
+- `"draft"`
+- `"final"`
+- `"reviewed"`
+
+<a id="persistence-type-eventbidtender-loaded"></a>
+
+### `event:bid/tender-loaded`
+
+SHA-256: `c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7`
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `data` | 必需 | [`event:bid/tender-loaded.data`](#persistence-type-eventbidtender-loadeddata) |
+| `ignorable` | 可选 | `true` |
+| `seq` | 必需 | `number` |
+| `time` | 必需 | `number` |
+| `type` | 必需 | `"bid/tender-loaded"` |
+
+<a id="persistence-type-eventbidtender-loadeddata"></a>
+
+### `event:bid/tender-loaded.data`
+
+SHA-256: `4b469b68b45bdbed3b0a6d580c2797d415e97ced192ae20e052bf32f36ca5761`
+
+来源：[`packages/bid/bid/src/types.ts:200`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `tender` | 必需 | [`packages/bid/bid/src/types.ts#BidTender`](#persistence-type-packagesbidbidsrctypestsbidtender) |
+
+<a id="persistence-type-eventbidtender-loadeddatatendersections"></a>
+
+### `event:bid/tender-loaded.data.tender.sections`
+
+SHA-256: `8dee7aa64ecfae9385138d5c808d34ea8966aa43213afa9f0d60e88d8ad99b30`
+
+[`packages/bid/bid/src/types.ts#BidTenderSectionRef`](#persistence-type-packagesbidbidsrctypestsbidtendersectionref) 的数组。
+
 <a id="persistence-type-eventcommanddone"></a>
 
 ### `event:command/done`
@@ -2517,7 +2731,7 @@ SHA-256: `5dd766ccd1702a1142ad8b4bd44f2242f8e8a6752669ad3de0a5d224329b1438`
 | 属性 | 存在性 | 类型 |
 |---|---|---|
 | `shadowedRange` | 必需 | [`event:compaction/prune.data.shadowedRange`](#persistence-type-eventcompactionprunedatashadowedrange) |
-| `shadowedSeqs` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `shadowedSeqs` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `shadowedTokenCount` | 必需 | `number` |
 
 <a id="persistence-type-eventcompactionprunedatashadowedrange"></a>
@@ -2601,7 +2815,7 @@ SHA-256: `9ff2ad8dddb836f75e8f6197fff2371323dfc396c3c6fb667e6e0b42fda79a5c`
 | `provider` | 必需 | `string` |
 | `rawOutput` | 必需 | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
 | `shadowedRange` | 必需 | [`event:compaction/prune.data.shadowedRange`](#persistence-type-eventcompactionprunedatashadowedrange) |
-| `shadowedSeqs` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `shadowedSeqs` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `shadowedTokenCount` | 必需 | `number` |
 | `sourceCommandId` | 可选 | `string` |
 | `summary` | 必需 | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
@@ -2621,7 +2835,7 @@ SHA-256: `3aa261c8516b5c955ed12080e6257a56cbe513f6c9f0ac9274c12e96c196ebca`
 | `provider` | 必需 | `string` |
 | `rawOutput` | 可选 | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
 | `shadowedRange` | 必需 | [`event:compaction/prune.data.shadowedRange`](#persistence-type-eventcompactionprunedatashadowedrange) |
-| `shadowedSeqs` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `shadowedSeqs` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `shadowedTokenCount` | 必需 | `number` |
 | `sourceCommandId` | 可选 | `string` |
 | `summary` | 必需 | [`event:agent/inbox/spliced.data.inserted[0].content`](#persistence-type-eventagentinboxspliceddatainserted0content) |
@@ -3352,7 +3566,7 @@ SHA-256: `69becfb6b2d3fd5da91518089454cae8ef33f1835637ec44dde35dd077fd4bae`
 | `data` | 必需 | [`event:system/message.data`](#persistence-type-eventsystemmessagedata) |
 | `ignorable` | 可选 | `true` |
 | `seq` | 必需 | `number` |
-| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | 必需 | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | 必需 | `number` |
 | `type` | 必需 | `"system/message"` |
@@ -3696,7 +3910,7 @@ SHA-256: `29af48b840d0cd9e48b6f50bf3b354f8f6340607c5b99220a48e74f60beac9e2`
 | `data` | 必需 | [`event:tool/result.data`](#persistence-type-eventtoolresultdata) |
 | `ignorable` | 可选 | `true` |
 | `seq` | 必需 | `number` |
-| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | 必需 | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | 必需 | `number` |
 | `type` | 必需 | `"tool/result"` |
@@ -3939,7 +4153,7 @@ SHA-256: `314765bdff29c7862fb6ce820f1773563ba3094a680d163ea21180a2591b8578`
 | `data` | 必需 | [`packages/llm/llm/src/message.ts#UserMessage`](#persistence-type-packagesllmllmsrcmessagetsusermessage) |
 | `ignorable` | 可选 | `true` |
 | `seq` | 必需 | `number` |
-| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | 必需 | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | 必需 | `number` |
 | `type` | 必需 | `"user/message"` |
@@ -4120,6 +4334,14 @@ SHA-256: `c99e20441bf15341e9db54385e558e5c03d21dff2eb1ac08ccbf47c2d8747954`
 SHA-256: `277b61f9c6f8170425fa6ffe06cfa14376757a896a4749cb82a687d7364c4fc9`
 
 `"file"`
+
+<a id="persistence-type-final"></a>
+
+### `"final"`
+
+SHA-256: `6b9cb60af5039c92daef29dc251a6a5b49a45a9e29f94dae9719f52d2359b975`
+
+`"final"`
 
 <a id="persistence-type-finish"></a>
 
@@ -4474,6 +4696,79 @@ SHA-256: `2f1e6a7ebace43d727ae138ddcd352eb3813960009e5805b8c5ac84300c97716`
 - `"image/png"`
 - `"image/webp"`
 
+<a id="persistence-type-packagesbidbidsrctypestsbidexport"></a>
+
+### `packages/bid/bid/src/types.ts#BidExport`
+
+SHA-256: `7c5ab319a37e4bd26d5b24c931563230650cc8cc48eaa83bc4d6d311686c63fb`
+
+来源：[`packages/bid/bid/src/types.ts:75`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `docxPath` | 必需 | `string` |
+| `exportId` | 必需 | `string` |
+| `pages` | 必需 | `number` |
+| `tenderId` | 可选 | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidmatch"></a>
+
+### `packages/bid/bid/src/types.ts#BidMatch`
+
+SHA-256: `740f859b1474ce5e8705d28da20e096a00dc0061e65e2b0bfebb7db4eaeb09e0`
+
+来源：[`packages/bid/bid/src/types.ts:63`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `gaps` | 必需 | `number` |
+| `matched` | 必需 | `number` |
+| `risks` | 必需 | [`event:assistant/attempt.data.stream[0][0].texts`](#persistence-type-eventassistantattemptdatastream00texts) |
+| `tenderId` | 必需 | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidsection"></a>
+
+### `packages/bid/bid/src/types.ts#BidSection`
+
+SHA-256: `52ecee56150a8055f723d2e8ba368e75da1fc1d2741782c9e0a1b1dbefdb5a00`
+
+来源：[`packages/bid/bid/src/types.ts:51`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `sectionId` | 必需 | `string` |
+| `status` | 必需 | [`event:bid/section-generated.data.section.status`](#persistence-type-eventbidsection-generateddatasectionstatus) |
+| `tenderId` | 可选 | `string` |
+| `title` | 必需 | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidtender"></a>
+
+### `packages/bid/bid/src/types.ts#BidTender`
+
+SHA-256: `b5e7f7164523047d4f38f29b45570d44e3f867739c68f65bfe2442dcb63379ef`
+
+来源：[`packages/bid/bid/src/types.ts:39`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `sectionCount` | 必需 | `number` |
+| `sections` | 可选 | [`event:bid/tender-loaded.data.tender.sections`](#persistence-type-eventbidtender-loadeddatatendersections) |
+| `tenderId` | 必需 | `string` |
+| `title` | 必需 | `string` |
+
+<a id="persistence-type-packagesbidbidsrctypestsbidtendersectionref"></a>
+
+### `packages/bid/bid/src/types.ts#BidTenderSectionRef`
+
+SHA-256: `d21f3aac002f36f1eed800088c9c4afa7bad2fcf855ca2e2f83ee70c84a90109`
+
+来源：[`packages/bid/bid/src/types.ts:31`](../packages/bid/bid/src/types.ts)
+
+| 属性 | 存在性 | 类型 |
+|---|---|---|
+| `sectionId` | 必需 | `string` |
+| `title` | 必需 | `string` |
+
 <a id="persistence-type-packagescompactioncompaction-image-offloadsrcprojectiontsimageoffloadtarget"></a>
 
 ### `packages/compaction/compaction-image-offload/src/projection.ts#ImageOffloadTarget`
@@ -4484,7 +4779,7 @@ SHA-256: `1cde1bedde79c5e8a56aee9c05c8e0a579cf5bc611deb85b93fa331a16ca978f`
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
-| `imageIndexes` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `imageIndexes` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `seq` | 必需 | `number` |
 
 <a id="persistence-type-packagescontextagent-instructionssrcrendertsagentinstructionchange"></a>
@@ -5644,7 +5939,7 @@ SHA-256: `9fe0e77a7816b7fdb4b953ec0e2f0cd7bbd22c5de5c3567e612d1b20eb0992e6`
 | 属性 | 存在性 | 类型 |
 |---|---|---|
 | `maxTokens` | 必需 | `number` |
-| `messageSeqs` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `messageSeqs` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `messages` | 必需 | [`event:session/title-llm-request.data.messages`](#persistence-type-eventsessiontitle-llm-requestdatamessages) |
 | `route` | 必需 | [`packages/session/session-title/src/types.ts#SessionTitleModelIdentity`](#persistence-type-packagessessionsession-titlesrctypestssessiontitlemodelidentity) |
 | `system` | 必需 | `string` |
@@ -5660,7 +5955,7 @@ SHA-256: `b56f6a885da3dc394c69a3e3cc5c0cfc4da15601b63fda4989eee8f40efc5be4`
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
-| `messageSeqs` | 必需 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `messageSeqs` | 必需 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `source` | 必需 | [`packages/session/session-title/src/types.ts#SessionTitleSource`](#persistence-type-packagessessionsession-titlesrctypestssessiontitlesource) |
 | `title` | 必需 | `string` |
 
@@ -6113,6 +6408,14 @@ SHA-256: `34d1ab5c5df378186d6054b1a1beea9a41e41965d6f336f0bc0025c441a82e66`
 
 `"resume"`
 
+<a id="persistence-type-reviewed"></a>
+
+### `"reviewed"`
+
+SHA-256: `59c39fbf9ed537c48817524aabecc59711b7dbf3ec6707086407dca07bf52388`
+
+`"reviewed"`
+
 <a id="persistence-type-sandboxmode"></a>
 
 ### `"sandbox/mode"`
@@ -6193,7 +6496,7 @@ SHA-256: `5776e5553ff2dfe3f5bc202dbb1e7c9f93e35a531aebb7764c23b2b6153b2ccc`
 
 以下类型之一：
 
-- [`SessionEventEnvelope[39]`](#persistence-type-sessioneventenvelope39)
+- [`SessionEventEnvelope[43]`](#persistence-type-sessioneventenvelope43)
 - [`SessionEventEnvelope[6]`](#persistence-type-sessioneventenvelope6)
 - [`SessionEventEnvelope[0]`](#persistence-type-sessioneventenvelope0)
 
@@ -6210,9 +6513,9 @@ SHA-256: `e3e77b26f0148755a505f5b8ea843a3be117827d4703bb5754d9dc8ddbef521f`
 | `time` | 必需 | `number` |
 | `type` | 必需 | `string` |
 
-<a id="persistence-type-sessioneventenvelope39"></a>
+<a id="persistence-type-sessioneventenvelope43"></a>
 
-### `SessionEventEnvelope[39]`
+### `SessionEventEnvelope[43]`
 
 SHA-256: `998f22585a5d73ec005365e203f07fc3b3a029e82323fdda3fd7f13b0a9639d0`
 
@@ -6220,14 +6523,14 @@ SHA-256: `998f22585a5d73ec005365e203f07fc3b3a029e82323fdda3fd7f13b0a9639d0`
 |---|---|---|
 | `ignorable` | 可选 | `true` |
 | `seq` | 必需 | `number` |
-| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[39].sourceEventSeqs`](#persistence-type-sessioneventenvelope39sourceeventseqs) |
+| `sourceEventSeqs` | 可选 | [`SessionEventEnvelope[43].sourceEventSeqs`](#persistence-type-sessioneventenvelope43sourceeventseqs) |
 | `surfaceOp` | 必需 | [`packages/core/session/src/types.ts#SurfaceOp`](#persistence-type-packagescoresessionsrctypestssurfaceop) |
 | `time` | 必需 | `number` |
 | `type` | 必需 | `string` |
 
-<a id="persistence-type-sessioneventenvelope39sourceeventseqs"></a>
+<a id="persistence-type-sessioneventenvelope43sourceeventseqs"></a>
 
-### `SessionEventEnvelope[39].sourceEventSeqs`
+### `SessionEventEnvelope[43].sourceEventSeqs`
 
 SHA-256: `5d03ba38734809bcbd2a55221bd938b3b3fc34b49bb686c6113e9e4931e3aa78`
 
@@ -6339,7 +6642,7 @@ SHA-256: `57f3f606ff8b6c84d9c443faace9d1dd10cca0354f37a4f515ef075f7c351b90`
 
 SHA-256: `4cd48f3e5108bd6ebedf7301c3638839b8b2b9db8dbd493974177fbdeb91a01b`
 
-来源：[`packages/api/session-controller/src/types.ts:376`](../packages/api/session-controller/src/types.ts) · [`packages/attachment/attachment/src/brand.ts:6`](../packages/attachment/attachment/src/brand.ts) · [`packages/compaction/compaction/src/brand.ts:4`](../packages/compaction/compaction/src/brand.ts) · [`packages/core/session/src/types.ts:19`](../packages/core/session/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:20`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:32`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:8`](../packages/experimental/agent-team/src/types.ts) · [`packages/feedback/message-feedback/src/types.ts:14`](../packages/feedback/message-feedback/src/types.ts) · [`packages/goal/goal/src/types.ts:17`](../packages/goal/goal/src/types.ts) · [`packages/interaction/commands/src/brand.ts:31`](../packages/interaction/commands/src/brand.ts) · [`packages/interaction/user-approval/src/types.ts:17`](../packages/interaction/user-approval/src/types.ts) · [`packages/llm/llm-retry/src/brand.ts:4`](../packages/llm/llm-retry/src/brand.ts) · [`packages/llm/llm/src/brand.ts:16`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:31`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:43`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:67`](../packages/llm/llm/src/brand.ts) · [`packages/schedule/schedule/src/types.ts:10`](../packages/schedule/schedule/src/types.ts) · [`packages/session/session-title/src/index.ts:42`](../packages/session/session-title/src/index.ts) · [`packages/session/session-title/src/types.ts:17`](../packages/session/session-title/src/types.ts) · [`packages/webhook/webhook/src/brand.ts:12`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:6`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:9`](../packages/webhook/webhook/src/brand.ts) · [`packages/workflow/workflow/src/types.ts:13`](../packages/workflow/workflow/src/types.ts)
+来源：[`packages/api/session-controller/src/types.ts:376`](../packages/api/session-controller/src/types.ts) · [`packages/attachment/attachment/src/brand.ts:6`](../packages/attachment/attachment/src/brand.ts) · [`packages/bid/bid/src/types.ts:22`](../packages/bid/bid/src/types.ts) · [`packages/bid/bid/src/types.ts:25`](../packages/bid/bid/src/types.ts) · [`packages/bid/bid/src/types.ts:28`](../packages/bid/bid/src/types.ts) · [`packages/compaction/compaction/src/brand.ts:4`](../packages/compaction/compaction/src/brand.ts) · [`packages/core/session/src/types.ts:19`](../packages/core/session/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:20`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:32`](../packages/experimental/agent-team/src/types.ts) · [`packages/experimental/agent-team/src/types.ts:8`](../packages/experimental/agent-team/src/types.ts) · [`packages/feedback/message-feedback/src/types.ts:14`](../packages/feedback/message-feedback/src/types.ts) · [`packages/goal/goal/src/types.ts:17`](../packages/goal/goal/src/types.ts) · [`packages/interaction/commands/src/brand.ts:31`](../packages/interaction/commands/src/brand.ts) · [`packages/interaction/user-approval/src/types.ts:17`](../packages/interaction/user-approval/src/types.ts) · [`packages/llm/llm-retry/src/brand.ts:4`](../packages/llm/llm-retry/src/brand.ts) · [`packages/llm/llm/src/brand.ts:16`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:31`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:43`](../packages/llm/llm/src/brand.ts) · [`packages/llm/llm/src/brand.ts:67`](../packages/llm/llm/src/brand.ts) · [`packages/schedule/schedule/src/types.ts:10`](../packages/schedule/schedule/src/types.ts) · [`packages/session/session-title/src/index.ts:42`](../packages/session/session-title/src/index.ts) · [`packages/session/session-title/src/types.ts:17`](../packages/session/session-title/src/types.ts) · [`packages/webhook/webhook/src/brand.ts:12`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:6`](../packages/webhook/webhook/src/brand.ts) · [`packages/webhook/webhook/src/brand.ts:9`](../packages/webhook/webhook/src/brand.ts) · [`packages/workflow/workflow/src/types.ts:13`](../packages/workflow/workflow/src/types.ts)
 
 `string`
 

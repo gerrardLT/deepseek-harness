@@ -31,6 +31,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-fs` | `edit`, `read`, `read_image`, `write` | `ctx.tools`, `ctx.fs`, `ctx.systemPrompt`, `ctx.attachments (image-tool registration)`, `ctx.llm + an image-capable route (image-tool execution)` | `tool/call`, `fs/write-intent or fs/edit-intent for mutations`, `fs/observed after read presence/absence or successful file operation`, `durable attachment (read_image)`, `tool/result` | - | The read-before-write/edit policy is added by `@deepseek-ai/dsh-fs-observation-policy` (an `fs/*` event-gate plugin, no schema change); a deployment that loads these tools is expected to also load it. The image tool is not registered without `ctx.attachments`; its schema is route-independent, and execution refuses unless the exact routed model declares image input. |
 | `@deepseek-ai/dsh-tool-fs-search` | `glob`, `grep` | `ctx.tools`, `ctx.subprocess`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | glob and grep are unconditional discovery tools that spawn the packaged ripgrep binary (`@vscode/ripgrep`) through ctx.subprocess as ordinary foreground calls (never background jobs) — no host `rg` install and no shell layer. The catalog uses `sampleOverCapGlobResults: true`; deployments must choose that behavior explicitly. Capped results save the complete formatted list through the optional ctx.spillStore backend; returned locators are follow-up-readable/searchable when the backend exposes local paths in co-located deployments. |
 | `@deepseek-ai/dsh-tool-terminal` | `terminal_close`, `terminal_list`, `terminal_open`, `terminal_read`, `terminal_send`, `terminal_signal` | `ctx.tools`, `ctx.terminals`, `ctx.systemPrompt`, `ctx.jobs at call time for run_in_background` | `tool/call`, `tool/result` | - | The six terminal tools are opt-in and complement one-shot shell/filesystem tools. `terminal_send(run_in_background: true)` registers with `ctx.jobs`; TUI, named key sequences, BEL, resize, auto-start, and cross-agent sharing are absent from the schema. |
+| `@deepseek-ai/dsh-tool-bid` | `bid_export`, `bid_generate_bid`, `bid_generate_section`, `bid_match_capabilities`, `bid_parse_tender` | `ctx.tools`, `ctx.sessionProjections`, `ctx.bid`, `ctx.fs`, `ctx.jobs`, `ctx.subagents`, `owning Agent session` | `tool/call`, `bid/tender-loaded`, `bid/capability-matched`, `bid/section-generated`, `bid/export-produced`, `tool/result` | - | The five bid tools parse, match, generate one section, generate the whole bid in an owner-scoped background job, and export. The whole-bid tool uses bounded ctx.subagents workers for structured briefs and commits central-service section results to the parent Session in manifest order. |
 | `@deepseek-ai/dsh-tool-goal` | `create_goal`, `get_goal`, `update_goal` | `ctx.tools`, `ctx.agents`, `ctx.goals`, `ctx.systemPrompt`, `a calling Agent in an authorized open turn` | `tool/call`, `goal/change for mutations`, `tool/result` | - | create, edit, pause, and resume require direct-human root authority; complete and blocked also accept the exact current goal round. The default blocked lower bound is three admitted rounds. |
 | `@deepseek-ai/dsh-schedule` | `schedule_create`, `schedule_delete`, `schedule_list` | `ctx.tools`, `ctx.sessions`, `Session persistence`, `a future live root Agent` | `tool/call`, `schedule/change create or delete`, `tool/result` | - | Registered only inside live root Agent scopes created after the opt-in Schedule plugin loads. Version 1 accepts after_seconds, explicit absolute at, and bounded fixed-rate every_seconds, and discloses session-local delivery; management reads and mutations require the shared Session persistence barrier. |
 | `@deepseek-ai/dsh-tool-lsp` | `lsp` | `ctx.tools`, `ctx.lsp`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | The lsp tool keeps provider selection and language-server subprocesses behind ctx.lsp, so its model-visible schema stays stable across providers. Requires a registered provider (e.g. `@deepseek-ai/dsh-lsp-stdio`) at runtime; without one, a query returns the structured `LSP_UNAVAILABLE` error rather than changing the schema. |
@@ -1266,6 +1267,127 @@ Send an allowed signal to the current foreground process group of a persistent t
 Source: [`packages/terminal/tool-terminal/src/index.ts`](../packages/terminal/tool-terminal/src/index.ts)
 
 The six terminal tools are opt-in and complement one-shot shell/filesystem tools. `terminal_send(run_in_background: true)` registers with `ctx.jobs`; TUI, named key sequences, BEL, resize, auto-start, and cross-agent sharing are absent from the schema.
+
+<a id="deepseek-aidsh-tool-bid"></a>
+
+## `@deepseek-ai/dsh-tool-bid`
+
+### `bid_export`
+
+Export a loaded tender's technical bid as a formatted DOCX. Call it after the sections are generated; it returns the produced artifact path and page count. Provide the tenderId.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender to export."
+    }
+  },
+  "required": [
+    "tenderId"
+  ]
+}
+```
+
+Source: [`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_generate_bid`
+
+Generate every section of the loaded tender in a managed background job. Bounded subagents prepare structured section briefs, the central bid service writes each section, and the parent session receives ordered section events.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender to generate."
+    }
+  },
+  "required": [
+    "tenderId"
+  ]
+}
+```
+
+Source: [`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_generate_section`
+
+Generate one technical-bid section for a loaded tender. Call it once per section after bid_parse_tender; it returns the drafted section, which is folded into the bidOutline projection. Provide the tenderId and sectionId.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender owning the section."
+    },
+    "sectionId": {
+      "type": "string",
+      "description": "Identifier of the outline section to generate."
+    }
+  },
+  "required": [
+    "tenderId",
+    "sectionId"
+  ]
+}
+```
+
+Source: [`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_match_capabilities`
+
+Match the enterprise archive against a loaded tender's requirements. Call it after bid_parse_tender; it returns how many requirements are satisfied, how many are gaps, and risk notes. Provide the tenderId from the loaded tender.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tenderId": {
+      "type": "string",
+      "description": "Identifier of the loaded tender to match against."
+    }
+  },
+  "required": [
+    "tenderId"
+  ]
+}
+```
+
+Source: [`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+### `bid_parse_tender`
+
+Parse a tender document and load its structured summary into the session. Call it once per tender before matching capabilities or writing sections; later tender tools require a tender already loaded here. Provide the tender file path and its title.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Workspace-relative path to the tender document to parse."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable tender title shown in the conversation card."
+    }
+  },
+  "required": [
+    "path",
+    "title"
+  ]
+}
+```
+
+Source: [`packages/bid/tool-bid/src/index.ts`](../packages/bid/tool-bid/src/index.ts)
+
+The five bid tools parse, match, generate one section, generate the whole bid in an owner-scoped background job, and export. The whole-bid tool uses bounded ctx.subagents workers for structured briefs and commits central-service section results to the parent Session in manifest order.
 
 <a id="deepseek-aidsh-tool-goal"></a>
 

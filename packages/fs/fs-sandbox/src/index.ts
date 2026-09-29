@@ -30,7 +30,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { LocalFileSystem } from '@deepseek-ai/dsh-fs-local'
 import type { Config as LocalConfig } from '@deepseek-ai/dsh-fs-local'
 import { FsError } from '@deepseek-ai/dsh-fs'
-import type { FsEditOutcome, FsEditRequest, FsTarget, FsVersion, FsWriteIntent, FsWriteOutcome } from '@deepseek-ai/dsh-fs'
+import type { FsByteStreamWrite, FsEditOutcome, FsEditRequest, FsTarget, FsVersion, FsWriteIntent, FsWriteOutcome } from '@deepseek-ai/dsh-fs'
 import { writableRoots } from '@deepseek-ai/dsh-sandbox'
 import type { SandboxExecutionPolicy, SandboxMode } from '@deepseek-ai/dsh-sandbox'
 import type {} from '@deepseek-ai/dsh-sandbox-policy'
@@ -85,6 +85,25 @@ export class SandboxedFileSystem extends LocalFileSystem {
     sandboxPolicy?: SandboxExecutionPolicy,
   ): Promise<FsWriteOutcome> {
     return super.writeText(await this.checkedTarget(target, sandboxPolicy), content, expected, signal)
+  }
+
+  /**
+   * Fence an atomic streamed byte write with the per-call policy.
+   * @param target - destination within the selected filesystem scope.
+   * @param source - byte stream and size limits.
+   * @param expected - caller's write intent.
+   * @param signal - optional caller cancellation.
+   * @param sandboxPolicy - policy applied before resolving the destination.
+   * @returns the published byte count.
+   */
+  override async writeByteStream(
+    target: FsTarget,
+    source: FsByteStreamWrite,
+    expected?: FsWriteIntent,
+    signal?: AbortSignal,
+    sandboxPolicy?: SandboxExecutionPolicy,
+  ): Promise<{ bytes: number }> {
+    return super.writeByteStream(await this.checkedTarget(target, sandboxPolicy), source, expected, signal)
   }
 
   /**

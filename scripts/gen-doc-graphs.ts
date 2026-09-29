@@ -85,6 +85,7 @@ const GROUP_ORDER = [
   'spill',
   'todo',
   'plan',
+  'bid',
   'cordis',
   'hooks',
   'session-persistence',
@@ -162,6 +163,11 @@ const SERVICE_ROLES: ServiceRole[] = [
     key: 'officeToPdf', pkg: 'office-to-pdf', title: 'Office to PDF conversion',
     mode: 'core', consumers: ['client-ui-sidebar-documentpreview'],
     note: 'Authorized Office bytes are converted on the Host using the declared native target engine, or Node WASM when no native target is declared.',
+  },
+  {
+    key: 'bid', pkg: 'bid', title: 'Central bid REST service seam',
+    mode: 'core', consumers: ['tool-bid', 'command-bid'],
+    note: 'The HTTP client to the central bidding service; the bid tools and the /bid command delegate tender parsing, capability matching, section generation, and export through it, then write the bid/* Session events and projections.',
   },
   {
     key: 'attachments',

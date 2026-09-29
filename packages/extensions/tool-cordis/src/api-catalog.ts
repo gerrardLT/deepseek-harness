@@ -595,6 +595,43 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'bid',
+    summary: 'The HTTP-backed BidClient registered as `ctx.bid`.',
+    description: 'The HTTP-backed BidClient registered as `ctx.bid`. One process-wide service serves every composition; each request reads the delegation token from the configured environment variable at call time, so a rotated token is picked up without a reload.',
+    methods: [
+      {
+        signature: 'parseTender(request: BidParseTenderRequest, signal?: AbortSignal): Promise<CurrentBidTender>',
+        description: 'Parse a tender document into its structured summary.',
+        parameters: [{ name: 'request', description: 'the tender title, filename, exact byte count, and streaming byte source.' }, { name: 'signal', description: 'optional caller cancellation combined with the timeout.' }],
+        returns: 'the parsed tender summary from the central service.',
+      },
+      {
+        signature: 'async matchCapabilities(request: { tenderId: TenderId }, signal?: AbortSignal): Promise<BidMatch>',
+        description: 'Match the enterprise capability archive against a loaded tender.',
+        parameters: [{ name: 'request', description: 'the tender identifier to match.' }, { name: 'signal', description: 'optional caller cancellation combined with the timeout.' }],
+        returns: 'the matched/gap counts and risk notes.',
+      },
+      {
+        signature: 'async generateSection( request: BidGenerateSectionRequest, signal?: AbortSignal, ): Promise<CurrentBidSection>',
+        description: 'Generate or revise one technical-bid section.',
+        parameters: [{ name: 'request', description: 'the tender and section identifiers.' }, { name: 'signal', description: 'optional caller cancellation combined with the timeout.' }],
+        returns: 'the generated section with its status.',
+      },
+      {
+        signature: 'async exportBid(request: BidExportRequest, signal?: AbortSignal): Promise<CurrentBidExport>',
+        description: 'Export a tender\'s technical bid to a document artifact.',
+        parameters: [{ name: 'request', description: 'the tender identifier to export.' }, { name: 'signal', description: 'optional caller cancellation combined with the timeout.' }],
+        returns: 'the produced export artifact descriptor.',
+      },
+      {
+        signature: 'async listProjects(signal?: AbortSignal): Promise<BidProjectSummary[]>',
+        description: 'List central bid projects for the global project panel.',
+        parameters: [{ name: 'signal', description: 'optional caller cancellation.' }],
+        returns: 'central project summaries in service order.',
+      },
+    ],
+  },
+  {
     key: 'browserUse',
     summary: 'Owns one optional provider registration in the shared browser-use service.',
     description: 'Owns one optional provider registration in the shared browser-use service.',
@@ -1052,6 +1089,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         description: 'Atomically create or replace UTF-8 text. `expected` guards intent and staleness; omission allows unconditional overwrite.',
         parameters: [{ name: 'target', description: 'the resolved target to write.' }, { name: 'content', description: 'the full new file content.' }, { name: 'expected', description: 'the write intent guarding the write; omit for unconditional.' }, { name: 'signal', description: 'aborts before atomic publication takes effect.' }, { name: 'sandboxPolicy', description: 'the per-call mode and workspace root this write runs under; a sandboxing backend fences the write by it, the bare backend ignores it. Omit to leave the backend its own default.' }],
         returns: 'the outcome, including the version the write produced.',
+      },
+      {
+        signature: 'writeByteStream( target: FsTarget, source: FsByteStreamWrite, expected?: FsWriteIntent, signal?: AbortSignal, sandboxPolicy?: SandboxExecutionPolicy, ): Promise<{ bytes: number }>',
+        description: 'Atomically stream raw bytes into a regular file. The provider rejects a complete stream above `maxBytes`, an exact-length mismatch, and cancellation before publication; none of those failures changes the destination.',
+        parameters: [{ name: 'target', description: 'the resolved target to write.' }, { name: 'source', description: 'byte stream and complete-content limits.' }, { name: 'expected', description: 'the write intent guarding the write; omit for unconditional.' }, { name: 'signal', description: 'aborts before atomic publication takes effect.' }, { name: 'sandboxPolicy', description: 'the per-call mode and workspace root.' }],
+        returns: 'the number of bytes atomically published.',
       },
       {
         signature: 'abstract editText( target: FsTarget, edit: FsEditRequest, expected?: { version: FsVersion }, signal?: AbortSignal, sandboxPolicy?: SandboxExecutionPolicy, ): Promise<FsEditOutcome>',
@@ -4225,6 +4268,50 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface BashEnvVariableInfo extends BashEnvVariable {\n    contributor: string;\n    key: DshEnvironmentKey;\n}',
   },
   {
+    name: 'BidExport',
+    declaration: 'export interface BidExport {\n    tenderId?: TenderId;\n    exportId: BidExportId;\n    docxPath: string;\n    pages: number;\n}',
+  },
+  {
+    name: 'BidExportId',
+    declaration: 'export type BidExportId = Branded<\'BidExportId\'>;',
+  },
+  {
+    name: 'BidExportRequest',
+    declaration: 'export interface BidExportRequest {\n    tenderId: TenderId;\n    session: Session;\n    destination: string;\n}',
+  },
+  {
+    name: 'BidGenerateSectionRequest',
+    declaration: 'export interface BidGenerateSectionRequest {\n    tenderId: TenderId;\n    sectionId: SectionId;\n    brief?: BidSectionBrief;\n}',
+  },
+  {
+    name: 'BidMatch',
+    declaration: 'export interface BidMatch {\n    tenderId: TenderId;\n    matched: number;\n    gaps: number;\n    risks: string[];\n}',
+  },
+  {
+    name: 'BidParseTenderRequest',
+    declaration: 'export interface BidParseTenderRequest {\n    title: string;\n    name: string;\n    bytes: number;\n    data: AsyncIterable<Uint8Array>;\n}',
+  },
+  {
+    name: 'BidProjectSummary',
+    declaration: 'export interface BidProjectSummary {\n    projectId: string;\n    title: string;\n    sessionId?: SessionId | undefined;\n    status: \'parsed\' | \'matching\' | \'generating\' | \'ready\' | \'exported\' | \'failed\';\n    completedSections: number;\n    totalSections: number;\n    updatedAt: string;\n}',
+  },
+  {
+    name: 'BidSection',
+    declaration: 'export interface BidSection {\n    tenderId?: TenderId;\n    sectionId: SectionId;\n    title: string;\n    status: \'draft\' | \'reviewed\' | \'final\';\n}',
+  },
+  {
+    name: 'BidSectionBrief',
+    declaration: 'export interface BidSectionBrief {\n    sectionId: SectionId;\n    strategy: string;\n    requirements: string[];\n}',
+  },
+  {
+    name: 'BidTender',
+    declaration: 'export interface BidTender {\n    tenderId: TenderId;\n    title: string;\n    sections?: BidTenderSectionRef[];\n    sectionCount: number;\n}',
+  },
+  {
+    name: 'BidTenderSectionRef',
+    declaration: 'export interface BidTenderSectionRef {\n    sectionId: SectionId;\n    title: string;\n}',
+  },
+  {
     name: 'Branded',
     declaration: 'export type Branded<B extends string> = string & {\n    readonly [BRAND]: B;\n};',
   },
@@ -4525,6 +4612,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type CredentialRef = Branded<\'CredentialRef\'>;',
   },
   {
+    name: 'CurrentBidExport',
+    declaration: 'export type CurrentBidExport = BidExport & {\n    tenderId: TenderId;\n};',
+  },
+  {
+    name: 'CurrentBidSection',
+    declaration: 'export type CurrentBidSection = BidSection & {\n    tenderId: TenderId;\n};',
+  },
+  {
+    name: 'CurrentBidTender',
+    declaration: 'export type CurrentBidTender = BidTender & {\n    sections: BidTenderSectionRef[];\n};',
+  },
+  {
     name: 'DeepSeekLlmApiExtensionMap',
     declaration: 'export interface DeepSeekLlmApiExtensionMap {\n}',
   },
@@ -4707,6 +4806,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'FinishReasonMap',
     declaration: 'export interface FinishReasonMap {\n    \'stop\': {\n        kind: \'stop\';\n    };\n    \'tool-calls\': {\n        kind: \'tool-calls\';\n    };\n    \'max-tokens\': {\n        kind: \'max-tokens\';\n    };\n    \'aborted\': {\n        kind: \'aborted\';\n        failure: LlmFailure;\n    };\n    \'error\': {\n        kind: \'error\';\n        failure: LlmFailure;\n    };\n}',
+  },
+  {
+    name: 'FsByteStreamWrite',
+    declaration: 'export interface FsByteStreamWrite {\n    data: AsyncIterable<Uint8Array>;\n    maxBytes: number;\n    expectedBytes?: number;\n}',
   },
   {
     name: 'FsDirEntry',
@@ -5657,6 +5760,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type SearchResultView = SearchMatchesResultView | SearchPathsResultView;',
   },
   {
+    name: 'SectionId',
+    declaration: 'export type SectionId = Branded<\'SectionId\'>;',
+  },
+  {
     name: 'SendTeamMessageRequest',
     declaration: 'export interface SendTeamMessageRequest {\n    readonly target: string;\n    readonly content: ContentBlock[];\n    readonly signal: AbortSignal;\n}',
   },
@@ -6575,6 +6682,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'TeamWaitResult',
     declaration: 'export interface TeamWaitResult {\n    readonly timedOut: boolean;\n}',
+  },
+  {
+    name: 'TenderId',
+    declaration: 'export type TenderId = Branded<\'TenderId\'>;',
   },
   {
     name: 'TerminalAttachmentId',
