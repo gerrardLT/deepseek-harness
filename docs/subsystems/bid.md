@@ -33,7 +33,7 @@ Generated from source by `scripts/gen-cordis-catalog.ts` (verified fresh by `pnp
 
 ### `ctx.bid` — `BidService`
 
-The HTTP-backed BidClient registered as `ctx.bid`. One process-wide service serves every composition; each request reads the delegation token from the configured environment variable at call time, so a rotated token is picked up without a reload.
+The HTTP-backed BidClient registered as `ctx.bid`. One process-wide service serves every composition. In static mode each request reads the delegation token from `tokenEnv` at call time, so a rotated token is picked up without a reload. In exchange mode the service trades its service credential for a short-lived delegation token, caches it, and exchanges again before it expires or after the central service rejects it.
 
 ```ts cordis-catalog
 /**

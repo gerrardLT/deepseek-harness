@@ -116,6 +116,18 @@ describe('BidService REST client', () => {
     await expect((await mount()).parseTender({ name: 'a.docx', title: 'Road tender', bytes: 1, data: (async function* () { yield Uint8Array.of(1) })() }, controller.signal)).rejects.toThrow()
   })
 
+  it('requires serviceTokenEnv and delegationSubject together', async () => {
+    const ctx = new Context()
+    try {
+      expect(() => new BidService(ctx, {
+        apiBaseUrl: base, serviceTokenEnv: 'BID_TEST_TOKEN', timeoutMs: 1,
+        maxTenderBytes: 1024, maxExportBytes: 1048576,
+      })).toThrow('serviceTokenEnv and delegationSubject must be configured together')
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
+
   it('rejects non-HTTP base URLs', async () => {
     const ctx = new Context()
     try {
@@ -123,6 +135,90 @@ describe('BidService REST client', () => {
         apiBaseUrl: 'ftp://bid.internal', tokenEnv: 'BID_TEST_TOKEN', timeoutMs: 1,
         maxTenderBytes: 1024, maxExportBytes: 1048576,
       })).toThrow('apiBaseUrl must use http or https')
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
+})
+
+describe('BidService delegation exchange', () => {
+  let exchangeServer: Server
+  let exchangeBase: string
+  const exchanges: Array<{ serviceToken: string | undefined; body: unknown }> = []
+  const bearers: string[] = []
+  let rejectNext = false
+
+  beforeEach(async () => {
+    exchanges.length = 0
+    bearers.length = 0
+    rejectNext = false
+    process.env.BID_TEST_SERVICE_TOKEN = 'service-secret'
+    exchangeServer = createServer((request, response) => {
+      const chunks: Buffer[] = []
+      request.on('data', (chunk: Buffer) => { chunks.push(chunk) })
+      request.on('end', () => {
+        response.setHeader('content-type', 'application/json')
+        if (request.url === '/api/agent/delegation') {
+          exchanges.push({
+            serviceToken: request.headers['x-dsh-service-token'] as string | undefined,
+            body: JSON.parse(Buffer.concat(chunks).toString('utf8')),
+          })
+          response.end(JSON.stringify({ token: `jwt-${exchanges.length}`, scopes: ['bid:read'], expiresIn: 900, issuedAt: 0 }))
+          return
+        }
+        bearers.push(String(request.headers.authorization))
+        if (rejectNext) {
+          rejectNext = false
+          response.statusCode = 403
+          response.end(JSON.stringify({ error: 'expired' }))
+          return
+        }
+        response.end('[]')
+      })
+    })
+    await new Promise<void>(resolve => exchangeServer.listen(0, '127.0.0.1', resolve))
+    exchangeBase = `http://127.0.0.1:${(exchangeServer.address() as AddressInfo).port}/api/agent`
+  })
+
+  afterEach(async () => {
+    await new Promise<void>(resolve => exchangeServer.close(() => { resolve() }))
+    delete process.env.BID_TEST_SERVICE_TOKEN
+  })
+
+  async function mountExchange(): Promise<BidService> {
+    const ctx = new Context()
+    await ctx.plugin(LocalFileSystem, { cwd: process.cwd() })
+    await ctx.plugin(BidService, {
+      apiBaseUrl: exchangeBase, serviceTokenEnv: 'BID_TEST_SERVICE_TOKEN', delegationSubject: 'boss',
+      maxTenderBytes: 1024, maxExportBytes: 1048576,
+    })
+    return ctx.bid
+  }
+
+  it('exchanges once, reuses the cached token, and re-exchanges after rejection', async () => {
+    const bid = await mountExchange()
+    await Promise.all([bid.listProjects(), bid.listProjects()])
+    expect(exchanges).toEqual([{
+      serviceToken: 'service-secret',
+      body: { subject: 'boss', scopes: ['bid:read', 'bid:create', 'bid:update', 'bid:export'] },
+    }])
+    expect(bearers).toEqual(['Bearer jwt-1', 'Bearer jwt-1'])
+
+    rejectNext = true
+    await expect(bid.listProjects()).rejects.toThrow('failed with status 403')
+    await bid.listProjects()
+    expect(exchanges).toHaveLength(2)
+    expect(bearers.at(-1)).toBe('Bearer jwt-2')
+  })
+
+  it('fails loud at load when the service credential is absent', async () => {
+    delete process.env.BID_TEST_SERVICE_TOKEN
+    const ctx = new Context()
+    try {
+      expect(() => new BidService(ctx, {
+        apiBaseUrl: exchangeBase, serviceTokenEnv: 'BID_TEST_SERVICE_TOKEN', delegationSubject: 'boss', timeoutMs: 1,
+        maxTenderBytes: 1024, maxExportBytes: 1048576,
+      })).toThrow('token environment variable BID_TEST_SERVICE_TOKEN must have a nonempty value')
     } finally {
       await ctx.fiber.dispose()
     }

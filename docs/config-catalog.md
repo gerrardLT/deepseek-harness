@@ -395,8 +395,16 @@ Requires: `fs`
 export interface Config {
   /** Base URL of the central bid REST service; a trailing slash is added when absent. */
   apiBaseUrl: string
-  /** Environment variable holding the delegation JWT sent as a Bearer token. */
+  /** Environment variable holding a static delegation JWT; ignored in exchange mode. */
   tokenEnv?: string
+  /**
+   * Exchange mode: environment variable holding the runtime's service credential.
+   * When set with `delegationSubject`, the client obtains short-lived delegation
+   * JWTs from the central `delegation` endpoint instead of reading `tokenEnv`.
+   */
+  serviceTokenEnv?: string
+  /** Central-service username the exchanged tokens act for; required with `serviceTokenEnv`. */
+  delegationSubject?: string
   /** Per-request timeout in milliseconds for long parse/generate/export calls. */
   timeoutMs?: number
   /** Maximum accepted tender upload size in bytes. */

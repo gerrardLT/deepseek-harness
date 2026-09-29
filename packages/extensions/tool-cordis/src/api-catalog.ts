@@ -597,7 +597,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
   {
     key: 'bid',
     summary: 'The HTTP-backed BidClient registered as `ctx.bid`.',
-    description: 'The HTTP-backed BidClient registered as `ctx.bid`. One process-wide service serves every composition; each request reads the delegation token from the configured environment variable at call time, so a rotated token is picked up without a reload.',
+    description: 'The HTTP-backed BidClient registered as `ctx.bid`. One process-wide service serves every composition. In static mode each request reads the delegation token from `tokenEnv` at call time, so a rotated token is picked up without a reload. In exchange mode the service trades its service credential for a short-lived delegation token, caches it, and exchanges again before it expires or after the central service rejects it.',
     methods: [
       {
         signature: 'parseTender(request: BidParseTenderRequest, signal?: AbortSignal): Promise<CurrentBidTender>',
@@ -4289,7 +4289,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'BidParseTenderRequest',
-    declaration: 'export interface BidParseTenderRequest {\n    title: string;\n    name: string;\n    bytes: number;\n    data: AsyncIterable<Uint8Array>;\n}',
+    declaration: 'export interface BidParseTenderRequest {\n    title: string;\n    name: string;\n    bytes: number;\n    data: AsyncIterable<Uint8Array>;\n    sessionId?: SessionId | undefined;\n}',
   },
   {
     name: 'BidProjectSummary',

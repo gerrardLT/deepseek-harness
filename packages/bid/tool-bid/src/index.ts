@@ -302,7 +302,13 @@ export function apply(ctx: Context, config: Config): void {
         }
       })()
       const name = target.displayPath.replaceAll('\\', '/').split('/').pop() ?? 'tender'
-      const tender = await ctx.bid.parseTender({ title, name, bytes: size, data }, exec.signal)
+      const tender = await ctx.bid.parseTender({
+        title,
+        name,
+        bytes: size,
+        data,
+        sessionId: session.id,
+      }, exec.signal)
       session.append('bid/tender-loaded', { tender })
       return { tender }
     },

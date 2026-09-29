@@ -329,7 +329,7 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 'bid/capability-matched': { match: BidMatch }
 ```
 
-来源：[`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
 
 <a id="bidexport-produced--log-only"></a>
 
@@ -340,7 +340,7 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 'bid/export-produced': { artifact: BidExport }
 ```
 
-来源：[`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:208`](../packages/bid/bid/src/types.ts)
 
 <a id="bidsection-generated--log-only"></a>
 
@@ -351,7 +351,7 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 'bid/section-generated': { section: BidSection }
 ```
 
-来源：[`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
 
 <a id="bidtender-loaded--log-only"></a>
 
@@ -362,7 +362,7 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 'bid/tender-loaded': { tender: BidTender }
 ```
 
-来源：[`packages/bid/bid/src/types.ts:200`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
 
 ### `command/*`
 
@@ -2491,7 +2491,7 @@ SHA-256: `0d05a662fb3ccd43e2808af1f667074a948d3fe1f96006f34bc9d6455e3388b1`
 
 SHA-256: `58c16719eecda4fa349aa2b109d3e9ef5a53fb18cde7681b72c4b3d509d65187`
 
-来源：[`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -2517,7 +2517,7 @@ SHA-256: `5867439a7bd348e88d13c3ee4fc2b6ad42056d92becb58d023c5518cb2c8430e`
 
 SHA-256: `fcc65db165e284c3dff9e0d7ed136c2ddc620e3380fdf9fb50a91c2ff8d44d93`
 
-来源：[`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:208`](../packages/bid/bid/src/types.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -2543,7 +2543,7 @@ SHA-256: `0cbe66b61baca9854af52743bf036b189b0ed0836ea2306b3e00254f710bb4c5`
 
 SHA-256: `8f18a915975e27940db90d76765c160068f3cbeada299c4977930ce02f0ee250`
 
-来源：[`packages/bid/bid/src/types.ts:204`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:206`](../packages/bid/bid/src/types.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|
@@ -2581,7 +2581,7 @@ SHA-256: `c91c532896155b606dc8c1a10f23ea8426e64a34418b76ab339952d8cbb55fb7`
 
 SHA-256: `4b469b68b45bdbed3b0a6d580c2797d415e97ced192ae20e052bf32f36ca5761`
 
-来源：[`packages/bid/bid/src/types.ts:200`](../packages/bid/bid/src/types.ts)
+来源：[`packages/bid/bid/src/types.ts:202`](../packages/bid/bid/src/types.ts)
 
 | 属性 | 存在性 | 类型 |
 |---|---|---|

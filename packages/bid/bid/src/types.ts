@@ -111,6 +111,8 @@ export interface BidParseTenderRequest {
   bytes: number
   /** Exact file bytes in order; producers must not buffer the whole document. */
   data: AsyncIterable<Uint8Array>
+  /** Owning session ID attached to the created project for bidirectional navigation. */
+  sessionId?: SessionId | undefined
 }
 
 /**

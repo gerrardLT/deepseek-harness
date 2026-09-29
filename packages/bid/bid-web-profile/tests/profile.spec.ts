@@ -117,6 +117,8 @@ describe('bid Web profile bundle', () => {
     const env = {
       BID_API_BASE_URL: 'https://bid.example/api/',
       BID_TOKEN_ENV: 'SECRET_TOKEN_NAME',
+      BID_SERVICE_TOKEN_ENV: 'SERVICE_SECRET_NAME',
+      BID_DELEGATION_SUBJECT: 'enterprise-user',
       BID_MAX_TENDER_BYTES: '101',
       BID_MAX_EXPORT_BYTES: '202',
       BID_TIMEOUT_MS: '303',
@@ -128,6 +130,8 @@ describe('bid Web profile bundle', () => {
     expect(Object.fromEntries(Object.entries(bid!.config!).map(([key, field]) => [key, value(field)]))).toEqual({
       apiBaseUrl: 'https://bid.example/api/',
       tokenEnv: 'SECRET_TOKEN_NAME',
+      serviceTokenEnv: 'SERVICE_SECRET_NAME',
+      delegationSubject: 'enterprise-user',
       maxTenderBytes: 101,
       maxExportBytes: 202,
       timeoutMs: 303,

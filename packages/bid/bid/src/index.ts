@@ -41,8 +41,16 @@ declare module '@deepseek-ai/cordis' {
 export interface Config {
   /** Base URL of the central bid REST service; a trailing slash is added when absent. */
   apiBaseUrl: string
-  /** Environment variable holding the delegation JWT sent as a Bearer token. */
+  /** Environment variable holding a static delegation JWT; ignored in exchange mode. */
   tokenEnv?: string
+  /**
+   * Exchange mode: environment variable holding the runtime's service credential.
+   * When set with `delegationSubject`, the client obtains short-lived delegation
+   * JWTs from the central `delegation` endpoint instead of reading `tokenEnv`.
+   */
+  serviceTokenEnv?: string
+  /** Central-service username the exchanged tokens act for; required with `serviceTokenEnv`. */
+  delegationSubject?: string
   /** Per-request timeout in milliseconds for long parse/generate/export calls. */
   timeoutMs?: number
   /** Maximum accepted tender upload size in bytes. */
@@ -57,6 +65,15 @@ const DEFAULT_TOKEN_ENV = 'BID_DELEGATION_TOKEN'
 const DEFAULT_TIMEOUT_MS = 1_800_000
 /** Only HTTP(S) endpoints may carry commercial-secret tender traffic. */
 const ALLOWED_PROTOCOLS = ['http:', 'https:']
+
+/** Read one required credential from the environment, rejecting an absent or empty value. */
+function readEnv(name: string): string {
+  const value = process.env[name]
+  if (value === undefined || value.length === 0) {
+    throw new Error(`bid: token environment variable ${name} must have a nonempty value`)
+  }
+  return value
+}
 
 const tenderIdSchema = zod.string().min(1).transform(value => brandString<TenderId>(value))
 const sectionIdSchema = zod.string().min(1).transform(value => brandString<SectionId>(value))
@@ -104,17 +121,33 @@ const exportDescriptorSchema = zod.object({
   pages: zod.number().int().nonnegative(),
 }).strict()
 
+const delegationGrantSchema = zod.object({
+  token: zod.string().min(1),
+  scopes: zod.array(zod.string()),
+  expiresIn: zod.number().int().positive(),
+  issuedAt: zod.number().int(),
+}).strict()
+
+/** Scopes requested in exchange mode; the central service grants their intersection with the subject's permissions. */
+const DELEGATION_SCOPES = ['bid:read', 'bid:create', 'bid:update', 'bid:export']
+/** Exchanged tokens are refreshed this long before expiry so an in-flight request never carries an expired token. */
+const DELEGATION_REFRESH_MARGIN_MS = 60_000
+
 /**
  * The HTTP-backed {@link BidClient} registered as `ctx.bid`. One process-wide
- * service serves every composition; each request reads the delegation token
- * from the configured environment variable at call time, so a rotated token is
- * picked up without a reload.
+ * service serves every composition. In static mode each request reads the
+ * delegation token from `tokenEnv` at call time, so a rotated token is picked up
+ * without a reload. In exchange mode the service trades its service credential
+ * for a short-lived delegation token, caches it, and exchanges again before it
+ * expires or after the central service rejects it.
  */
 export default class BidService extends Service implements BidClient {
   static inject = ['fs']
   static Config: z<Config> = z.object({
     apiBaseUrl: z.string().required(),
     tokenEnv: z.string().default(DEFAULT_TOKEN_ENV),
+    serviceTokenEnv: z.string(),
+    delegationSubject: z.string(),
     timeoutMs: z.number().default(DEFAULT_TIMEOUT_MS),
     maxTenderBytes: z.number().required(),
     maxExportBytes: z.number().required(),
@@ -122,9 +155,12 @@ export default class BidService extends Service implements BidClient {
 
   private readonly apiBaseUrl: string
   private readonly tokenEnv: string
+  private readonly exchange: { serviceTokenEnv: string; subject: string } | undefined
   private readonly timeoutMs: number
   private readonly maxTenderBytes: number
   private readonly maxExportBytes: number
+  private grant: { token: string; refreshAt: number } | undefined
+  private pendingGrant: Promise<string> | undefined
 
   constructor(ctx: Context, config: Config) {
     super(ctx, 'bid')
@@ -140,7 +176,14 @@ export default class BidService extends Service implements BidClient {
     // base ends in a slash, so normalize once here rather than per request.
     this.apiBaseUrl = resolved.apiBaseUrl.endsWith('/') ? resolved.apiBaseUrl : `${resolved.apiBaseUrl}/`
     this.tokenEnv = resolved.tokenEnv
-    this.readToken()
+    const serviceTokenEnv = config.serviceTokenEnv?.trim() || undefined
+    const subject = config.delegationSubject?.trim() || undefined
+    if ((serviceTokenEnv === undefined) !== (subject === undefined)) {
+      throw new Error('bid: serviceTokenEnv and delegationSubject must be configured together')
+    }
+    this.exchange = serviceTokenEnv === undefined || subject === undefined ? undefined : { serviceTokenEnv, subject }
+    // Fail loud at load when the credential this mode depends on is absent.
+    readEnv(this.exchange?.serviceTokenEnv ?? this.tokenEnv)
     if (!Number.isSafeInteger(resolved.timeoutMs) || resolved.timeoutMs <= 0) {
       throw new Error('bid: timeoutMs must be a positive safe integer')
     }
@@ -171,6 +214,9 @@ export default class BidService extends Service implements BidClient {
     const path = new URL('tenders/parse', this.apiBaseUrl)
     path.searchParams.set('title', request.title)
     path.searchParams.set('name', request.name)
+    if (request.sessionId !== undefined) {
+      path.searchParams.set('sessionId', request.sessionId)
+    }
     return this.postStream(path, request, tenderSchema, signal)
   }
 
@@ -221,10 +267,11 @@ export default class BidService extends Service implements BidClient {
     const timeout = AbortSignal.timeout(this.timeoutMs)
     const combined = signal === undefined ? timeout : AbortSignal.any([signal, timeout])
     const response = await fetch(downloadUrl, {
-      headers: { authorization: `Bearer ${this.readToken()}` },
+      headers: { authorization: `Bearer ${await this.bearer(combined)}` },
       signal: combined,
     })
     if (!response.ok) {
+      this.forgetRejectedGrant(response.status)
       const detail = (await response.text()).slice(0, 500)
       throw new Error(`bid REST export download failed with status ${response.status}: ${detail}`)
     }
@@ -280,7 +327,7 @@ export default class BidService extends Service implements BidClient {
     const timer = setTimeout(() => { controller.abort(new Error(`bid REST ${path} timed out`)) }, this.timeoutMs)
     try {
       const response = await fetch(new URL(path, this.apiBaseUrl), {
-        method: 'GET', headers: { authorization: `Bearer ${this.readToken()}` }, signal: combined,
+        method: 'GET', headers: { authorization: `Bearer ${await this.bearer(combined)}` }, signal: combined,
       })
       return await this.decodeResponse(path, response, schema)
     } finally {
@@ -316,27 +363,45 @@ export default class BidService extends Service implements BidClient {
       },
     })
     const timeout = AbortSignal.timeout(this.timeoutMs)
+    const combined = signal === undefined ? timeout : AbortSignal.any([signal, timeout])
     const init: RequestInit & { duplex: 'half' } = {
       method: 'POST',
       headers: {
         'content-type': 'application/octet-stream',
         'content-length': String(request.bytes),
-        authorization: `Bearer ${this.readToken()}`,
+        authorization: `Bearer ${await this.bearer(combined)}`,
       },
       body,
       duplex: 'half',
-      signal: signal === undefined ? timeout : AbortSignal.any([signal, timeout]),
+      signal: combined,
     }
     const response = await fetch(url, init)
     return this.decodeResponse('tenders/parse', response, schema)
   }
 
-  private readToken(): string {
-    const token = process.env[this.tokenEnv]
-    if (token === undefined || token.length === 0) {
-      throw new Error(`bid: token environment variable ${this.tokenEnv} must have a nonempty value`)
-    }
-    return token
+  /**
+   * Resolve the Bearer token for one request: the static `tokenEnv` value, or a
+   * cached exchanged token refreshed before expiry. Concurrent callers share one
+   * in-flight exchange.
+   */
+  private async bearer(signal?: AbortSignal): Promise<string> {
+    if (this.exchange === undefined) return readEnv(this.tokenEnv)
+    if (this.grant !== undefined && Date.now() < this.grant.refreshAt) return this.grant.token
+    this.pendingGrant ??= this.exchangeGrant(this.exchange, signal).finally(() => { this.pendingGrant = undefined })
+    return this.pendingGrant
+  }
+
+  private async exchangeGrant(exchange: { serviceTokenEnv: string; subject: string }, signal?: AbortSignal): Promise<string> {
+    const timeout = AbortSignal.timeout(this.timeoutMs)
+    const response = await fetch(new URL('delegation', this.apiBaseUrl), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-dsh-service-token': readEnv(exchange.serviceTokenEnv) },
+      body: JSON.stringify({ subject: exchange.subject, scopes: DELEGATION_SCOPES }),
+      signal: signal === undefined ? timeout : AbortSignal.any([signal, timeout]),
+    })
+    const grant = await this.decodeResponse('delegation', response, delegationGrantSchema)
+    this.grant = { token: grant.token, refreshAt: Date.now() + grant.expiresIn * 1000 - DELEGATION_REFRESH_MARGIN_MS }
+    return grant.token
   }
 
   /**
@@ -348,24 +413,27 @@ export default class BidService extends Service implements BidClient {
    * @returns the validated response body.
    */
   private async post<T>(path: string, body: unknown, schema: ZodType<T>, signal?: AbortSignal): Promise<T> {
-    const headers: Record<string, string> = {
-      'content-type': 'application/json',
-      authorization: `Bearer ${this.readToken()}`,
-    }
     // Combine the caller's cancellation with the deployment timeout so a caller
     // signal never disables the timeout and a hung server cannot wait forever.
     const timeout = AbortSignal.timeout(this.timeoutMs)
+    const combined = signal === undefined ? timeout : AbortSignal.any([signal, timeout])
     const response = await fetch(new URL(path, this.apiBaseUrl), {
       method: 'POST',
-      headers,
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${await this.bearer(combined)}` },
       body: JSON.stringify(body),
-      signal: signal === undefined ? timeout : AbortSignal.any([signal, timeout]),
+      signal: combined,
     })
     return this.decodeResponse(path, response, schema)
   }
 
+  /** Drop a cached exchanged token the central service rejected, so the next request exchanges again. */
+  private forgetRejectedGrant(status: number): void {
+    if (status === 401 || status === 403) this.grant = undefined
+  }
+
   private async decodeResponse<T>(path: string, response: Response, schema: ZodType<T>): Promise<T> {
     if (!response.ok) {
+      this.forgetRejectedGrant(response.status)
       const detail = (await response.text()).slice(0, 500)
       throw new Error(`bid REST ${path} failed with status ${response.status}: ${detail}`)
     }

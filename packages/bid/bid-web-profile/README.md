@@ -36,7 +36,9 @@ The launcher auto-initializes the profile with `@deepseek-ai/dsh-base`, `@deepse
 | Environment variable | Default | Configuration target |
 |---|---:|---|
 | `BID_API_BASE_URL` | required | central API base URL |
-| `BID_TOKEN_ENV` | `BID_DELEGATION_TOKEN` | token environment-variable name |
+| `BID_TOKEN_ENV` | `BID_DELEGATION_TOKEN` | static token environment-variable name |
+| `BID_SERVICE_TOKEN_ENV` | none | service token env var for dynamic exchange |
+| `BID_DELEGATION_SUBJECT` | none | WorkFusion subject username for dynamic exchange |
 | `BID_MAX_TENDER_BYTES` | `104857600` | maximum tender bytes |
 | `BID_MAX_EXPORT_BYTES` | `104857600` | maximum export bytes |
 | `BID_TIMEOUT_MS` | `1800000` | central API request timeout |

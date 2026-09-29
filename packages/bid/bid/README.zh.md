@@ -44,7 +44,9 @@ kind: "package-reference"
 | 字段 | 默认值 | 含义 |
 |---|---|---|
 | `apiBaseUrl` | 必填 | 中心 bid REST 服务的 base URL（仅 http 或 https）；缺尾斜杠时会补上 |
-| `tokenEnv` | `BID_DELEGATION_TOKEN` | 调用时读取以取 `Authorization: Bearer` token 的环境变量 |
+| `tokenEnv` | `BID_DELEGATION_TOKEN` | 调用时读取以取静态 `Authorization: Bearer` token 的环境变量 |
+| `serviceTokenEnv` | 选填 | 保存用于向中心服务换取短期委托 token 的服务凭证环境变量 |
+| `delegationSubject` | 选填 | 换取到的短期委托 token 代表的 WorkFusion 用户名；与 `serviceTokenEnv` 联用 |
 | `timeoutMs` | `1800000` | 每请求超时（毫秒）；与调用方提供的取消 signal 组合 |
 | `maxTenderBytes` | 必填 | 流式上传招标文件的包含式字节上限 |
 | `maxExportBytes` | 必填 | 完整下载 DOCX 的包含式字节上限 |

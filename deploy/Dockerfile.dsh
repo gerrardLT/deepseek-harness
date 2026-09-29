@@ -1,0 +1,31 @@
+FROM node:24-bookworm-slim
+
+# Install system utilities, python3 and media/office tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    libreoffice \
+    ffmpeg \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN corepack enable && corepack prepare pnpm@11.7.0 --activate
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps ./apps
+COPY packages ./packages
+COPY vendor ./vendor
+COPY scripts ./scripts
+COPY tsconfig*.json tsdown*.ts ./
+
+RUN pnpm install --frozen-lockfile && pnpm run build
+
+EXPOSE 3080
+
+ENV DSH_WEB_HOST=0.0.0.0
+ENV DSH_WEB_PORT=3080
+
+CMD ["pnpm", "dsh", "--profile", "bid-web", "--no-open", "--port", "3080"]

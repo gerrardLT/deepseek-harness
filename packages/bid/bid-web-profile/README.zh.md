@@ -36,7 +36,9 @@ launcher 会按顺序用 `@deepseek-ai/dsh-base`、`@deepseek-ai/dsh-web-app` �
 | 环境变量 | 默认值 | 配置目标 |
 |---|---:|---|
 | `BID_API_BASE_URL` | 必填 | 中心 API base URL |
-| `BID_TOKEN_ENV` | `BID_DELEGATION_TOKEN` | token 环境变量名称 |
+| `BID_TOKEN_ENV` | `BID_DELEGATION_TOKEN` | 静态 token 环境变量名称 |
+| `BID_SERVICE_TOKEN_ENV` | 无 | 用于动态换取委托 token 的服务凭证环境变量 |
+| `BID_DELEGATION_SUBJECT` | 无 | 动态换取委托 token 所代理的 WorkFusion 用户名 |
 | `BID_MAX_TENDER_BYTES` | `104857600` | 招标文件最大字节数 |
 | `BID_MAX_EXPORT_BYTES` | `104857600` | 导出文件最大字节数 |
 | `BID_TIMEOUT_MS` | `1800000` | 中心 API 请求超时 |

@@ -12,6 +12,8 @@
       config:
         apiBaseUrl: !!js process.env.BID_API_BASE_URL
         tokenEnv: !!js process.env.BID_TOKEN_ENV ?? 'BID_DELEGATION_TOKEN'
+        serviceTokenEnv: !!js process.env.BID_SERVICE_TOKEN_ENV || (process.env.DSH_SERVICE_TOKEN && 'DSH_SERVICE_TOKEN') || undefined
+        delegationSubject: !!js process.env.BID_DELEGATION_SUBJECT
         maxTenderBytes: !!js Number(process.env.BID_MAX_TENDER_BYTES ?? 104857600)
         maxExportBytes: !!js Number(process.env.BID_MAX_EXPORT_BYTES ?? 104857600)
         timeoutMs: !!js Number(process.env.BID_TIMEOUT_MS ?? 1800000)

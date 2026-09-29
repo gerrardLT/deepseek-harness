@@ -31977,7 +31977,7 @@
         "event:bid/tender-loaded.data"
       ],
       "sources": [
-        "packages/bid/bid/src/types.ts:200"
+        "packages/bid/bid/src/types.ts:202"
       ]
     },
     {
@@ -35542,7 +35542,7 @@
         "event:bid/capability-matched.data"
       ],
       "sources": [
-        "packages/bid/bid/src/types.ts:202"
+        "packages/bid/bid/src/types.ts:204"
       ]
     },
     {
@@ -44829,7 +44829,7 @@
         "event:bid/section-generated.data"
       ],
       "sources": [
-        "packages/bid/bid/src/types.ts:204"
+        "packages/bid/bid/src/types.ts:206"
       ]
     },
     {
@@ -62453,7 +62453,7 @@
         "event:bid/export-produced.data"
       ],
       "sources": [
-        "packages/bid/bid/src/types.ts:206"
+        "packages/bid/bid/src/types.ts:208"
       ]
     },
     {

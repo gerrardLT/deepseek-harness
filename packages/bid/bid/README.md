@@ -44,7 +44,9 @@ Use `ctx.bid` when a bidding tool or command needs to reach the central bid REST
 | Field | Default | Meaning |
 |---|---|---|
 | `apiBaseUrl` | required | Base URL (http or https only) of the central bid REST service; a trailing slash is added when absent |
-| `tokenEnv` | `BID_DELEGATION_TOKEN` | Environment variable read at call time for the `Authorization: Bearer` token |
+| `tokenEnv` | `BID_DELEGATION_TOKEN` | Environment variable read at call time for the static `Authorization: Bearer` token |
+| `serviceTokenEnv` | optional | Environment variable holding the service credential used to exchange for short-lived delegation tokens |
+| `delegationSubject` | optional | WorkFusion subject username the exchanged tokens act for; required with `serviceTokenEnv` |
 | `timeoutMs` | `1800000` | Per-request timeout in milliseconds; combined with any caller-provided cancellation signal |
 | `maxTenderBytes` | required | Inclusive byte cap for a streamed tender upload |
 | `maxExportBytes` | required | Inclusive byte cap for the complete downloaded DOCX |
